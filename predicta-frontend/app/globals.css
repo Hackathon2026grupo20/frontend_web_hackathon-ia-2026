@@ -1,0 +1,45 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Painel de Operação — tema único por enquanto (decisão do time, ver documento de arquitetura) */
+[data-theme="operacao"] {
+  --bg: #0a0f1c;
+  --panel: transparent;
+  --panel-2: #141b2e;
+  --border: #1a2138;
+  --text: #eef1f8;
+  --text-dim: #7c869e;
+  /* D — pressão de demanda: âmbar quente, "energia sob pressão" */
+  --accent-demand: #ff9640;
+  --accent-demand-glow: rgba(255, 150, 64, 0.22);
+  /* C — exposição climática: amarelo-sol, deliberadamente distinto do âmbar de demanda */
+  --accent-climate: #f5d547;
+  --accent-climate-glow: rgba(245, 213, 71, 0.2);
+  /* S / eficiência / economia: verde-sinal, "rede saudável" */
+  --accent-supply: #39e67a;
+  --accent-good: #39e67a;
+  --accent-good-glow: rgba(57, 230, 122, 0.22);
+  --accent-alert: #ff4d3d;
+  --accent-alert-glow: rgba(255, 77, 61, 0.2);
+  --radius: 6px;
+  --font-display: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* Glow: reservado pra número/linha que representa o dado em si — não decoração espalhada */
+.glow-demand { text-shadow: 0 0 8px var(--accent-demand-glow, transparent); }
+.glow-climate { text-shadow: 0 0 8px var(--accent-climate-glow, transparent); }
+.glow-good { text-shadow: 0 0 8px var(--accent-good-glow, transparent); }
+.glow-alert { text-shadow: 0 0 8px var(--accent-alert-glow, transparent); }
+.glow-box-good { box-shadow: 0 0 10px var(--accent-good-glow, transparent); }
+.glow-box-alert { box-shadow: 0 0 10px var(--accent-alert-glow, transparent); }
