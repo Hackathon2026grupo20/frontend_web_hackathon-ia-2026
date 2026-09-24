@@ -30,6 +30,29 @@
   --font-mono: "IBM Plex Mono", monospace;
 }
 
+/* Landing/demo/login — tema claro, mesma família de cor recalibrada pra fundo branco */
+[data-theme="landing"] {
+  --bg: #f7f9fb;
+  --panel: #ffffff;
+  --panel-2: #eef1f5;
+  --border: #e1e6ed;
+  --text: #10182a;
+  --text-dim: #5b6577;
+  --accent-demand: #d9711f;
+  --accent-demand-glow: rgba(217, 113, 31, 0.12);
+  --accent-climate: #b8860b;
+  --accent-climate-glow: rgba(184, 134, 11, 0.12);
+  --accent-supply: #17925a;
+  --accent-good: #17925a;
+  --accent-good-glow: rgba(23, 146, 90, 0.12);
+  --accent-alert: #d1392a;
+  --accent-alert-glow: rgba(209, 57, 42, 0.12);
+  --radius: 10px;
+  --font-display: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
