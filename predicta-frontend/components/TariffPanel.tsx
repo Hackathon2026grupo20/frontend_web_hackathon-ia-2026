@@ -12,7 +12,7 @@ export function TariffPanel({ tarifa }: { tarifa: TarifaBase }) {
       <p className="text-xs text-dim mb-2 font-mono">Passo 3</p>
       <h2 className="font-display text-lg mb-3">Tarifa vigente (ANEEL)</h2>
       <div className="flex items-end gap-2 mb-3">
-        <span className="font-display text-3xl glow-demand" style={{ color: "var(--accent-demand)" }}>
+        <span className="font-display text-3xl text-text">
           R$ {tarifa.totalRsKwh.toFixed(5)}
         </span>
         <span className="text-sm text-dim mb-1">/ kWh</span>

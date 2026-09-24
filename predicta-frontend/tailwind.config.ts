@@ -11,6 +11,7 @@ const config: Config = {
         border: "var(--border)",
         text: "var(--text)",
         dim: "var(--text-dim)",
+        brand: "var(--accent-brand)",
         demand: "var(--accent-demand)",
         supply: "var(--accent-supply)",
         climate: "var(--accent-climate)",

@@ -49,23 +49,23 @@ export function ForecastChart({ signal }: { signal: SystemSignal }) {
         </ComposedChart>
       </ResponsiveContainer>
 
-      <div className="flex gap-4 mt-3 text-xs text-dim flex-wrap">
-        <span>
-          D (pressão de demanda):{" "}
-          <b className="glow-demand" style={{ color: "var(--accent-demand)" }}>{signal.d.toFixed(2)}</b>
-        </span>
-        <span>
-          S (pressão de oferta):{" "}
+      <div className="grid grid-cols-3 gap-2 mt-3">
+        <div className="border border-border rounded-card px-3 py-2">
+          <p className="text-[11px] text-dim">D (pressão de demanda)</p>
+          <b className="glow-demand text-sm" style={{ color: "var(--accent-demand)" }}>{signal.d.toFixed(2)}</b>
+        </div>
+        <div className="border border-border rounded-card px-3 py-2">
+          <p className="text-[11px] text-dim">S (pressão de oferta)</p>
           {signal.s === null ? (
-            <b className="glow-alert" style={{ color: "var(--accent-alert)" }}>sem fonte confiável — não estimado</b>
+            <b className="glow-alert text-sm" style={{ color: "var(--accent-alert)" }}>sem fonte confiável</b>
           ) : (
-            <b className="glow-good" style={{ color: "var(--accent-good)" }}>{signal.s.toFixed(2)}</b>
+            <b className="glow-good text-sm" style={{ color: "var(--accent-good)" }}>{signal.s.toFixed(2)}</b>
           )}
-        </span>
-        <span>
-          C (exposição climática):{" "}
-          <b className="glow-climate" style={{ color: "var(--accent-climate)" }}>{signal.c.toFixed(2)}</b>
-        </span>
+        </div>
+        <div className="border border-border rounded-card px-3 py-2">
+          <p className="text-[11px] text-dim">C (exposição climática)</p>
+          <b className="glow-climate text-sm" style={{ color: "var(--accent-climate)" }}>{signal.c.toFixed(2)}</b>
+        </div>
       </div>
       {signal.qualityFlags.length > 0 && (
         <p className="text-xs text-alert mt-2">⚠ {signal.qualityFlags.join(", ")}</p>

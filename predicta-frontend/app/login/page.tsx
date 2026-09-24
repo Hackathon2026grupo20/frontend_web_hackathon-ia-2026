@@ -41,7 +41,7 @@ export default function Login() {
           <button
             type="submit"
             className="w-full py-2.5 rounded-card font-medium text-white"
-            style={{ background: "var(--accent-demand)" }}
+            style={{ background: "var(--accent-brand)" }}
           >
             Entrar
           </button>

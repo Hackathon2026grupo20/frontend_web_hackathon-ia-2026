@@ -28,7 +28,7 @@ export default function SolicitarDemo() {
               Isso é só um protótipo — nenhum dado foi enviado de verdade. Em produção, a equipe
               entraria em contato em até 1 dia útil.
             </p>
-            <Link href="/login" className="text-sm font-medium" style={{ color: "var(--accent-demand)" }}>
+            <Link href="/login" className="text-sm font-medium" style={{ color: "var(--accent-brand)" }}>
               Ver o produto agora →
             </Link>
           </div>
@@ -47,7 +47,7 @@ export default function SolicitarDemo() {
             <button
               type="submit"
               className="w-full py-2.5 rounded-card font-medium text-white"
-              style={{ background: "var(--accent-demand)" }}
+              style={{ background: "var(--accent-brand)" }}
             >
               Enviar pedido
             </button>

@@ -26,7 +26,7 @@ export default function Landing() {
           <Link
             href="/demo"
             className="px-6 py-3 rounded-card font-medium text-white transition-transform hover:scale-[1.02]"
-            style={{ background: "var(--accent-demand)" }}
+            style={{ background: "var(--accent-brand)" }}
           >
             Solicitar demonstração
           </Link>
@@ -66,7 +66,7 @@ export default function Landing() {
             { n: "04", t: "Recomendamos quando agir", d: "Quando deslocar carga flexível pra pagar menos, com transparência total." },
           ].map((s) => (
             <div key={s.n}>
-              <span className="font-display text-3xl" style={{ color: "var(--accent-demand)" }}>{s.n}</span>
+              <span className="font-display text-3xl" style={{ color: "var(--accent-brand)" }}>{s.n}</span>
               <h3 className="font-display font-bold mt-2 mb-1.5">{s.t}</h3>
               <p className="text-sm text-dim leading-relaxed">{s.d}</p>
             </div>
@@ -112,7 +112,7 @@ export default function Landing() {
         <Link
           href="/demo"
           className="inline-block px-6 py-3 rounded-card font-medium text-white"
-          style={{ background: "var(--accent-demand)" }}
+          style={{ background: "var(--accent-brand)" }}
         >
           Solicitar demonstração
         </Link>
