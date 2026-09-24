@@ -20,11 +20,15 @@ export function ForecastChart({ signal }: { signal: SystemSignal }) {
     p50: p.p50,
   }));
 
+  const amanha = new Date();
+  amanha.setDate(amanha.getDate() + 1);
+  const amanhaLabel = amanha.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+
   return (
     <div className="bg-panel border border-border rounded-card p-5">
       <p className="text-xs text-dim mb-2 font-mono">Passo 4</p>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-lg">Previsão de demanda — próximas 24h</h2>
+        <h2 className="font-display text-lg">Previsão de demanda — amanhã, {amanhaLabel} (24h)</h2>
         <span className="text-xs text-dim font-mono">emitido {signal.issueTime.slice(11, 16)}</span>
       </div>
 

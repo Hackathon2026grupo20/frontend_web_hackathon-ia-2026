@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LocationPicker } from "@/components/LocationPicker";
 import { DistributorCard } from "@/components/DistributorCard";
 import { TariffPanel } from "@/components/TariffPanel";
@@ -11,6 +11,13 @@ import { FILIAIS_DEMO, mockResolveLocation, mockSystemSignal, mockSimulacao, moc
 
 export default function Home() {
   const [filialId, setFilialId] = useState(FILIAIS_DEMO[0].id);
+  const [agora, setAgora] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setAgora(new Date());
+    const id = setInterval(() => setAgora(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const distribuidora = mockResolveLocation(filialId);
   const tarifa = mockTarifaBase();
@@ -20,9 +27,22 @@ export default function Home() {
   return (
     <div data-theme="operacao" className="min-h-screen bg-bg text-text font-body">
       <div className="max-w-7xl mx-auto px-4 py-8 md:px-8">
-        <header className="mb-8">
-          <p className="text-xs text-dim font-mono mb-1">protótipo · dados mockados</p>
-          <h1 className="font-display font-extrabold text-2xl">Predicta</h1>
+        <header className="mb-8 flex items-start justify-between flex-wrap gap-2">
+          <div>
+            <p className="text-xs text-dim font-mono mb-1">protótipo · dados mockados</p>
+            <h1 className="font-display font-extrabold text-2xl">Predicta</h1>
+          </div>
+          {agora && (
+            <p className="text-xs text-dim font-mono mt-1 md:mt-2 capitalize">
+              {agora.toLocaleDateString("pt-BR", {
+                weekday: "long",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}{" "}
+              · {agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+            </p>
+          )}
         </header>
 
         {/* Sidebar (contexto do cadastro — muda pouco) + conteúdo principal (dinâmico a cada consulta) */}
