@@ -22,7 +22,7 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 py-8 md:px-8">
         <header className="mb-8">
           <p className="text-xs text-dim font-mono mb-1">protótipo · dados mockados</p>
-          <h1 className="font-display font-extrabold text-3xl md:text-4xl">Predicta</h1>
+          <h1 className="font-display font-extrabold text-2xl">Predicta</h1>
         </header>
 
         {/* Sidebar (contexto do cadastro — muda pouco) + conteúdo principal (dinâmico a cada consulta) */}

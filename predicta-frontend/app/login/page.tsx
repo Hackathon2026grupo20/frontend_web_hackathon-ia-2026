@@ -16,7 +16,7 @@ export default function Login() {
   return (
     <div data-theme="landing" className="min-h-screen bg-bg text-text font-body flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <Link href="/" className="font-display font-extrabold text-xl block text-center mb-8">
+        <Link href="/" className="font-display font-extrabold text-2xl block text-center mb-8">
           Predicta
         </Link>
         <form onSubmit={handleSubmit} className="bg-panel border border-border rounded-card p-6">

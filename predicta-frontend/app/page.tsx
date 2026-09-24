@@ -5,7 +5,7 @@ export default function Landing() {
     <div data-theme="landing" className="min-h-screen bg-bg text-text font-body">
       {/* Header */}
       <header className="max-w-5xl mx-auto px-4 md:px-8 py-6 flex items-center justify-between">
-        <span className="font-display font-extrabold text-xl">Predicta</span>
+        <span className="font-display font-extrabold text-2xl">Predicta</span>
         <Link href="/login" className="text-sm text-dim hover:text-text transition-colors">
           Já é cliente? Entrar
         </Link>
