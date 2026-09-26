@@ -11,34 +11,54 @@ import {
   CartesianGrid,
 } from "recharts";
 import type { HourlyPoint } from "@/types/api";
+import { dataLocal, faixaPressao, horaLocal, type FaixaPressao } from "@/lib/format";
 
-const PRESSURE_COLOR: Record<string, string> = {
+const PRESSURE_COLOR: Record<FaixaPressao, string> = {
   alta: "var(--accent-alert)",
   media: "var(--accent-demand)",
   baixa: "var(--accent-good)",
 };
 
-export function ForecastChart({ hourly, displayTimezone }: { hourly: HourlyPoint[]; displayTimezone: string }) {
+const MODE_LABEL: Record<string, string> = {
+  replay: "replay histórico",
+  operational: "previsão operacional",
+  mock: "dados de exemplo",
+};
+
+export function ForecastChart({
+  hourly,
+  displayTimezone,
+  mode,
+}: {
+  hourly: HourlyPoint[];
+  displayTimezone: string;
+  mode: string;
+}) {
   const data = hourly.map((h) => ({
-    hora: h.time,
+    hora: horaLocal(h),
     demanda: h.demand_p50_mw,
-    pressao: h.demand_pressure,
   }));
 
-  const amanha = new Date();
-  amanha.setDate(amanha.getDate() + 1);
-  const amanhaLabel = amanha.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  // A data vem da janela simulada (em replay é histórica), não do relógio do navegador.
+  const inicio = hourly.length ? dataLocal(hourly[0]) : "";
+  const fim = hourly.length ? dataLocal(hourly[hourly.length - 1]) : "";
+  const periodo = inicio === fim ? inicio : `${inicio}–${fim}`;
 
-  const contagemPressao = hourly.reduce<Record<string, number>>((acc, h) => {
-    acc[h.demand_pressure] = (acc[h.demand_pressure] ?? 0) + 1;
-    return acc;
-  }, {});
+  const contagemPressao = hourly.reduce<Record<FaixaPressao, number>>(
+    (acc, h) => {
+      acc[faixaPressao(h.demand_pressure)] += 1;
+      return acc;
+    },
+    { alta: 0, media: 0, baixa: 0 }
+  );
 
   return (
     <div className="bg-panel border border-border rounded-card p-5">
       <p className="text-xs text-dim mb-2 font-mono">Passo 4</p>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-lg">Previsão de demanda — amanhã, {amanhaLabel} (24h)</h2>
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <h2 className="font-display text-lg">
+          Previsão de demanda — {periodo} (24h, {MODE_LABEL[mode] ?? mode})
+        </h2>
         <span className="text-xs text-dim font-mono">{displayTimezone}</span>
       </div>
 
@@ -60,11 +80,14 @@ export function ForecastChart({ hourly, displayTimezone }: { hourly: HourlyPoint
           <div key={nivel} className="border border-border rounded-card px-3 py-2">
             <p className="text-[11px] text-dim capitalize">Pressão {nivel}</p>
             <b className="text-sm" style={{ color: PRESSURE_COLOR[nivel] }}>
-              {contagemPressao[nivel] ?? 0}h
+              {contagemPressao[nivel]}h
             </b>
           </div>
         ))}
       </div>
+      <p className="text-xs text-dim mt-2">
+        Pressão = percentil da demanda prevista no histórico da mesma hora e mês (tercis: baixa, média, alta).
+      </p>
     </div>
   );
 }

@@ -1,74 +1,55 @@
-import type { SimulationRequest } from "@/types/api";
+import type { CustomerType, SimulationMode } from "@/types/api";
 
-// Presets de região + distribuidora/CNPJ pra simplificar o formulário: o usuário só escolhe a
-// localidade, o resto do payload (cnpj, distributor, profile, monthly_kwh, customer_type,
-// flexible_pct) fica com defaults fixos aqui, sem aparecer na UI.
-// IDs de região confirmados contra GET /api/v1/simulations/options/ na API de produção
-// (retorna regions: N, NE, SE/CO, S). CNPJs/profile são exemplos — catalog/profiles/ ainda
-// devolve profiles:[] vazio pra essas combinações em produção (dados ainda não carregados
-// no backend), então "profile" pode precisar ajuste quando isso for populado.
+// Presets de região + CNPJ da concessão pra simplificar o formulário: o usuário só escolhe a
+// localidade. distributor_id e tariff_profile_id NÃO ficam fixos aqui — o backend valida os
+// dois contra a tabela ANEEL, então eles são buscados em GET /api/v1/catalog/profiles/
+// (ver lib/simulation.ts). IDs de região confirmados contra GET /api/v1/simulations/options/.
 export interface RegionPreset {
   id: string;
   label: string;
-  request: SimulationRequest;
+  cnpj: string;
+  distributorLabel: string;
+  monthly_kwh: number;
+  customer_type: CustomerType;
+  mode: SimulationMode;
+  flexible_pct: number;
 }
+
+const DEFAULTS = {
+  monthly_kwh: 350,
+  customer_type: "residential",
+  mode: "replay",
+  flexible_pct: 20,
+} as const;
 
 export const REGIONS_DEMO: RegionPreset[] = [
   {
     id: "SE/CO",
     label: "Sudeste/Centro-Oeste (Light — Rio de Janeiro)",
-    request: {
-      cnpj: "60444437000146",
-      region: "SE/CO",
-      distributor: "Light",
-      profile: "residencial_padrao",
-      monthly_kwh: 350,
-      customer_type: "residential",
-      mode: "replay",
-      flexible_pct: 20,
-    },
+    cnpj: "60444437000146",
+    distributorLabel: "Light",
+    ...DEFAULTS,
   },
   {
     id: "NE",
     label: "Nordeste (Enel CE — Fortaleza)",
-    request: {
-      cnpj: "07047251000170",
-      region: "NE",
-      distributor: "Enel CE",
-      profile: "residencial_padrao",
-      monthly_kwh: 350,
-      customer_type: "residential",
-      mode: "replay",
-      flexible_pct: 20,
-    },
+    cnpj: "07047251000170",
+    distributorLabel: "Enel CE",
+    ...DEFAULTS,
   },
   {
     id: "S",
     label: "Sul (CELESC)",
-    request: {
-      cnpj: "83878892000155",
-      region: "S",
-      distributor: "CELESC",
-      profile: "residencial_padrao",
-      monthly_kwh: 350,
-      customer_type: "residential",
-      mode: "replay",
-      flexible_pct: 20,
-    },
+    cnpj: "83878892000155",
+    distributorLabel: "CELESC",
+    ...DEFAULTS,
   },
   {
     id: "N",
     label: "Norte",
-    request: {
-      cnpj: "04895728000180",
-      region: "N",
-      distributor: "Equatorial",
-      profile: "residencial_padrao",
-      monthly_kwh: 350,
-      customer_type: "residential",
-      mode: "replay",
-      flexible_pct: 20,
-    },
+    cnpj: "04895728000180",
+    distributorLabel: "Equatorial",
+    ...DEFAULTS,
   },
 ];
 

@@ -8,7 +8,7 @@ import type {
 
 // Sem autenticação hoje: a API é pública, tudo por região (+ CNPJ da distribuidora).
 // Ver contexto completo em docs internos — endpoints sob /api/v1/, sem auth.
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
 
 export class ApiError extends Error {
   status: number;

@@ -7,14 +7,14 @@ import { TariffPanel } from "@/components/TariffPanel";
 import { ForecastChart } from "@/components/ForecastChart";
 import { TariffComparisonChart } from "@/components/TariffComparisonChart";
 import { LoadShiftBar } from "@/components/LoadShiftBar";
-import { ApiError, runSimulation } from "@/lib/api";
+import { API_BASE_URL } from "@/lib/api";
 import { REGIONS_DEMO, findRegionPreset } from "@/lib/regions";
-import type { SimulationResponse } from "@/types/api";
+import { USE_MOCK, simularRegiao, type SimulationResult } from "@/lib/simulation";
 
 export default function Dashboard() {
   const [regionId, setRegionId] = useState(REGIONS_DEMO[0].id);
   const [agora, setAgora] = useState<Date | null>(null);
-  const [simulacao, setSimulacao] = useState<SimulationResponse | null>(null);
+  const [resultado, setResultado] = useState<SimulationResult | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -30,14 +30,21 @@ export default function Dashboard() {
     let cancelado = false;
     setCarregando(true);
     setErro(null);
-    runSimulation(preset.request)
+    simularRegiao(preset)
       .then((data) => {
-        if (!cancelado) setSimulacao(data);
+        if (!cancelado) setResultado(data);
       })
       .catch((e) => {
         if (cancelado) return;
-        setSimulacao(null);
-        setErro(e instanceof ApiError ? e.message : "Não foi possível carregar a simulação.");
+        setResultado(null);
+        // TypeError = falha de rede ou bloqueio de CORS (o fetch não chega a ter status HTTP)
+        setErro(
+          e instanceof TypeError
+            ? "Não foi possível conectar à API (rede ou CORS)"
+            : e instanceof Error
+              ? e.message
+              : "Não foi possível carregar a simulação."
+        );
       })
       .finally(() => {
         if (!cancelado) setCarregando(false);
@@ -47,12 +54,16 @@ export default function Dashboard() {
     };
   }, [regionId]);
 
+  const simulacao = resultado?.simulation ?? null;
+
   return (
     <div data-theme="operacao" className="min-h-screen bg-bg text-text font-body">
       <div className="max-w-7xl mx-auto px-4 py-8 md:px-8">
         <header className="mb-8 flex items-start justify-between flex-wrap gap-2">
           <div>
-            <p className="text-xs text-dim font-mono mb-1">dados da API Predicta</p>
+            <p className="text-xs text-dim font-mono mb-1">
+              {USE_MOCK ? "dados de exemplo (sem API)" : "dados da API Predicta"}
+            </p>
             <h1 className="font-display font-extrabold text-2xl">Predicta</h1>
           </div>
           {agora && (
@@ -72,7 +83,11 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row gap-6">
           <aside className="md:w-72 flex-shrink-0 flex flex-col gap-5">
             <LocationPicker regionId={regionId} onChange={setRegionId} />
-            <DistributorCard preset={preset} />
+            <DistributorCard
+              preset={preset}
+              distributor={resultado?.distributor ?? simulacao?.concession ?? null}
+              profile={resultado?.profile ?? null}
+            />
             {simulacao && (
               <TariffPanel
                 referenceMeanRsKwh={simulacao.reference_tariff_mean_rs_kwh}
@@ -82,6 +97,12 @@ export default function Dashboard() {
           </aside>
 
           <main className="flex-1 min-w-0 flex flex-col gap-5">
+            {USE_MOCK && (
+              <div className="bg-panel border border-border rounded-card p-4 text-xs text-dim">
+                Modo de exemplo (NEXT_PUBLIC_USE_MOCK=1): curvas sintéticas geradas no navegador, sem
+                chamada à API. Servem só para visualizar a interface.
+              </div>
+            )}
             {carregando && (
               <div className="bg-panel border border-border rounded-card p-5 text-sm text-dim">
                 Carregando simulação…
@@ -90,15 +111,18 @@ export default function Dashboard() {
             {erro && !carregando && (
               <div className="bg-panel border border-alert rounded-card p-5 text-sm text-alert">
                 {erro} — verifique se a API está disponível em{" "}
-                <code className="font-mono">
-                  {process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000"}
-                </code>
+                <code className="font-mono">{API_BASE_URL}</code>
                 .
               </div>
             )}
             {simulacao && !carregando && !erro && (
               <>
-                <ForecastChart hourly={simulacao.hourly} displayTimezone={simulacao.display_timezone} />
+                <ForecastChart
+                  hourly={simulacao.hourly}
+                  displayTimezone={simulacao.display_timezone}
+                  mode={simulacao.simulation_mode}
+                />
+                <p className="text-xs text-dim">{simulacao.simulation_scope_pt}</p>
                 <TariffComparisonChart hourly={simulacao.hourly} differencePct={simulacao.difference_pct} />
                 <LoadShiftBar hourly={simulacao.hourly} />
               </>
