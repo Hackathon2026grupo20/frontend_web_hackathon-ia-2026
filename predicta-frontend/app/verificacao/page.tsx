@@ -10,6 +10,7 @@ import { LoadShiftBar } from "@/components/LoadShiftBar";
 import { ApiError, getCatalogProfiles, runSimulation } from "@/lib/api";
 import { REGIONS_DEMO, findRegionPreset } from "@/lib/regions";
 import { CUSTOMER_TYPES, FLEXIBLE_PCT_MAX, FLEXIBLE_PCT_MIN, MONTHLY_KWH_MIN, type CustomerType } from "@/lib/simulationChoices";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import type { CatalogProfilesResponse, SimulationRequest, SimulationResponse } from "@/types/api";
 
 function JsonBlock({ data }: { data: unknown }) {
@@ -39,6 +40,11 @@ export default function Verificacao() {
   const [customerType, setCustomerType] = useState<CustomerType>("residential");
   const [monthlyKwh, setMonthlyKwh] = useState(preset.request.monthly_kwh);
   const [flexiblePct, setFlexiblePct] = useState(preset.request.flexible_pct);
+
+  // Debounce nos controles "contínuos" (slider/número) — sem isso, arrastar o slider dispararia
+  // uma request por pixel contra um backend que pode estar acordando de um cold start.
+  const monthlyKwhDebounced = useDebouncedValue(monthlyKwh, 500);
+  const flexiblePctDebounced = useDebouncedValue(flexiblePct, 500);
 
   const [catalogo, setCatalogo] = useState<CatalogProfilesResponse | null>(null);
   const [carregandoCatalogo, setCarregandoCatalogo] = useState(true);
@@ -75,15 +81,17 @@ export default function Verificacao() {
     };
   }, [regionId]);
 
+  // Usa os valores debounçados no request de verdade — os "ao vivo" (monthlyKwh/flexiblePct)
+  // só alimentam o input controlado e o gráfico local (ConsumptionShapeCheck), que não bate na API.
   const request: SimulationRequest = {
     ...preset.request,
     profile: profileId,
     customer_type: customerType,
-    monthly_kwh: monthlyKwh,
-    flexible_pct: flexiblePct,
+    monthly_kwh: monthlyKwhDebounced,
+    flexible_pct: flexiblePctDebounced,
   };
 
-  // Roda a simulação sempre que qualquer controle mudar.
+  // Roda a simulação sempre que qualquer controle (já debounçado) mudar.
   useEffect(() => {
     let cancelado = false;
     setCarregandoSim(true);
@@ -104,7 +112,7 @@ export default function Verificacao() {
       cancelado = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [regionId, profileId, customerType, monthlyKwh, flexiblePct]);
+  }, [regionId, profileId, customerType, monthlyKwhDebounced, flexiblePctDebounced]);
 
   const perfilSelecionado = catalogo?.profiles.find((p) => p.id === profileId) ?? null;
 
@@ -308,7 +316,12 @@ export default function Verificacao() {
               />
               <TariffComparisonChart hourly={simulacao.hourly} differencePct={simulacao.difference_pct} />
               <OptimizationSummary optimization={simulacao.optimization} />
-              <ConsumptionShapeCheck hourly={simulacao.hourly} monthlyKwh={monthlyKwh} customerType={customerType} />
+              <ConsumptionShapeCheck
+                hourly={simulacao.hourly}
+                monthlyKwh={monthlyKwh}
+                customerType={customerType}
+                optimization={simulacao.optimization}
+              />
               <LoadShiftBar hourly={simulacao.hourly} />
             </>
           )}
