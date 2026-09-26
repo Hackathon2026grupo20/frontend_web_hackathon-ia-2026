@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { LocationPicker } from "@/components/LocationPicker";
 import { DistributorCard } from "@/components/DistributorCard";
 import { TariffPanel } from "@/components/TariffPanel";
@@ -66,6 +67,9 @@ export default function Dashboard() {
               · {agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </p>
           )}
+          <Link href="/pipeline" className="text-sm text-dim hover:text-text transition-colors">
+            Pipeline do modelo →
+          </Link>
         </header>
 
         {/* Sidebar (contexto do cadastro — muda pouco) + conteúdo principal (dinâmico a cada consulta) */}

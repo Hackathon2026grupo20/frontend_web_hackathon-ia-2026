@@ -12,6 +12,14 @@ import {
 } from "recharts";
 import type { HourlyPoint } from "@/types/api";
 
+// demand_pressure vem como fração 0..1 (percentil da hora frente ao histórico) — classificamos
+// em faixas só pra exibição, o valor bruto é o que alimenta o gráfico.
+function nivelPressao(p: number): "alta" | "media" | "baixa" {
+  if (p >= 0.66) return "alta";
+  if (p >= 0.33) return "media";
+  return "baixa";
+}
+
 const PRESSURE_COLOR: Record<string, string> = {
   alta: "var(--accent-alert)",
   media: "var(--accent-demand)",
@@ -30,7 +38,8 @@ export function ForecastChart({ hourly, displayTimezone }: { hourly: HourlyPoint
   const amanhaLabel = amanha.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 
   const contagemPressao = hourly.reduce<Record<string, number>>((acc, h) => {
-    acc[h.demand_pressure] = (acc[h.demand_pressure] ?? 0) + 1;
+    const nivel = nivelPressao(h.demand_pressure);
+    acc[nivel] = (acc[nivel] ?? 0) + 1;
     return acc;
   }, {});
 

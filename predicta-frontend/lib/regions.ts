@@ -3,10 +3,16 @@ import type { SimulationRequest } from "@/types/api";
 // Presets de região + distribuidora/CNPJ pra simplificar o formulário: o usuário só escolhe a
 // localidade, o resto do payload (cnpj, distributor, profile, monthly_kwh, customer_type,
 // flexible_pct) fica com defaults fixos aqui, sem aparecer na UI.
-// IDs de região confirmados contra GET /api/v1/simulations/options/ na API de produção
-// (retorna regions: N, NE, SE/CO, S). CNPJs/profile são exemplos — catalog/profiles/ ainda
-// devolve profiles:[] vazio pra essas combinações em produção (dados ainda não carregados
-// no backend), então "profile" pode precisar ajuste quando isso for populado.
+// IDs de região confirmados contra GET /api/v1/simulations/options/ (regions: N, NE, SE/CO, S).
+//
+// SE/CO (Light) foi validado de ponta a ponta contra o backend local:
+// - "distributor" precisa ser o distributor_id da tarifa (ex.: "LIGHT SESA"), não a sigla.
+// - "profile" precisa ser o id completo pipe-delimited de GET /api/v1/catalog/profiles/
+//   (ex.: "B1|Convencional|Residencial|Residencial|Tarifa de Aplicação"), não um slug inventado.
+//
+// NE, S e N ainda NÃO têm 24h operacionais publicadas em system_signal_v1 (mesmo no backend
+// local) — simulation_available fica false pra essas regiões, então cnpj/distributor/profile
+// abaixo são placeholders não confirmados. Ajustar quando o backend publicar dados pra elas.
 export interface RegionPreset {
   id: string;
   label: string;
@@ -20,8 +26,8 @@ export const REGIONS_DEMO: RegionPreset[] = [
     request: {
       cnpj: "60444437000146",
       region: "SE/CO",
-      distributor: "Light",
-      profile: "residencial_padrao",
+      distributor: "LIGHT SESA",
+      profile: "B1|Convencional|Residencial|Residencial|Tarifa de Aplicação",
       monthly_kwh: 350,
       customer_type: "residential",
       mode: "replay",
