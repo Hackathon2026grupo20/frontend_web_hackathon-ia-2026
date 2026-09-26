@@ -5,8 +5,8 @@ import type { SimulationRequest } from "@/types/api";
 // flexible_pct) fica com defaults fixos aqui, sem aparecer na UI.
 // IDs de região confirmados contra GET /api/v1/simulations/options/ (regions: N, NE, SE/CO, S).
 //
-// SE/CO (Light) foi validado de ponta a ponta contra o backend local:
-// - "distributor" precisa ser o distributor_id da tarifa (ex.: "LIGHT SESA"), não a sigla.
+// SE/CO (Enel RJ) foi validado de ponta a ponta contra o backend local:
+// - "distributor" precisa ser o distributor_id da tarifa (ex.: "ENEL RJ"), não a razão social.
 // - "profile" precisa ser o id completo pipe-delimited de GET /api/v1/catalog/profiles/
 //   (ex.: "B1|Convencional|Residencial|Residencial|Tarifa de Aplicação"), não um slug inventado.
 //
@@ -22,11 +22,11 @@ export interface RegionPreset {
 export const REGIONS_DEMO: RegionPreset[] = [
   {
     id: "SE/CO",
-    label: "Sudeste/Centro-Oeste (Light — Rio de Janeiro)",
+    label: "Sudeste/Centro-Oeste (Enel RJ — Rio de Janeiro)",
     request: {
-      cnpj: "60444437000146",
+      cnpj: "33050071000158",
       region: "SE/CO",
-      distributor: "LIGHT SESA",
+      distributor: "ENEL RJ",
       profile: "B1|Convencional|Residencial|Residencial|Tarifa de Aplicação",
       monthly_kwh: 350,
       customer_type: "residential",
@@ -40,8 +40,8 @@ export const REGIONS_DEMO: RegionPreset[] = [
     request: {
       cnpj: "07047251000170",
       region: "NE",
-      distributor: "Enel CE",
-      profile: "residencial_padrao",
+      distributor: "ENEL CE",
+      profile: "residencial_padrao", // catalog/profiles/ devolve profiles:[] vazio pra esse cnpj/região — sem id real pra usar ainda
       monthly_kwh: 350,
       customer_type: "residential",
       mode: "replay",

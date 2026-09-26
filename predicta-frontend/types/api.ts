@@ -28,14 +28,46 @@ export interface SimulationOptionsResponse {
   regions: RegionOption[];
 }
 
+export interface DistributorInfo {
+  cnpj_digits: string;
+  cnpj: string;
+  sigla: string;
+  razao_social: string;
+  uf: string;
+  regiao: string;
+  subsystem_id: string;
+  codigo_area_atuacao: string;
+  num_municipios: number;
+  num_unidades_consumidoras: number;
+  area_km2: number;
+  subsystem_mapping_method: string;
+  tariff_rows: number;
+  tariff_agent_names: string;
+  tariff_valid_from: string;
+  tariff_valid_to: string;
+  has_tariff_history: boolean;
+}
+
 export interface TariffProfile {
   id: string;
-  label?: string;
+  label: string;
+  distributor_id: string;
+  cnpj: string;
+  base_total_rs_kwh: number;
+  base_te_rs_kwh: number;
+  base_tusd_rs_kwh: number;
+  posts: string[];
+  valid_from: string;
+  valid_to: string;
+  effective_date: string;
+  subgroup: string;
+  modality: string;
+  customer_class: string;
   [key: string]: unknown;
 }
 
 export interface CatalogProfilesResponse {
-  distributor: string;
+  distributor: DistributorInfo;
   profiles: TariffProfile[];
   display_timezone: string;
 }
@@ -68,10 +100,38 @@ export interface HourlyPoint {
   delta_pct: number;
 }
 
+export interface SimulationCustomer {
+  distributor_id: string;
+  distributor_cnpj: string;
+  concession_sigla: string;
+  concession_name: string;
+  tariff_profile_id: string;
+  subsystem_id: string;
+  customer_type: string;
+  profile_source: string;
+  daily_consumption_kwh: number;
+  [key: string]: unknown;
+}
+
+export interface SimulationOptimization {
+  flexible_fraction: number;
+  flexible_energy_kwh: number;
+  actually_shifted_kwh: number;
+  flexible_percent: number;
+  original_dynamic_cost_24h_rs: number;
+  optimized_dynamic_cost_24h_rs: number;
+  potential_savings_24h_rs: number;
+  potential_savings_pct: number;
+  potential_savings_month_rs: number;
+  method: string;
+  is_illustrative: boolean;
+  [key: string]: unknown;
+}
+
 export interface SimulationResponse {
-  customer: Record<string, unknown>;
-  concession: Record<string, unknown>;
-  optimization: Record<string, unknown>;
+  customer: SimulationCustomer;
+  concession: DistributorInfo;
+  optimization: SimulationOptimization;
   window: ReplayWindow;
   hourly: HourlyPoint[];
   simulation_mode: string;

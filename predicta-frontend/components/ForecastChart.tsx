@@ -10,7 +10,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import type { HourlyPoint } from "@/types/api";
+import type { HourlyPoint, ReplayWindow } from "@/types/api";
 
 // demand_pressure vem como fração 0..1 (percentil da hora frente ao histórico) — classificamos
 // em faixas só pra exibição, o valor bruto é o que alimenta o gráfico.
@@ -26,16 +26,20 @@ const PRESSURE_COLOR: Record<string, string> = {
   baixa: "var(--accent-good)",
 };
 
-export function ForecastChart({ hourly, displayTimezone }: { hourly: HourlyPoint[]; displayTimezone: string }) {
+export function ForecastChart({
+  hourly,
+  displayTimezone,
+  janela,
+}: {
+  hourly: HourlyPoint[];
+  displayTimezone: string;
+  janela: ReplayWindow;
+}) {
   const data = hourly.map((h) => ({
     hora: h.time,
     demanda: h.demand_p50_mw,
     pressao: h.demand_pressure,
   }));
-
-  const amanha = new Date();
-  amanha.setDate(amanha.getDate() + 1);
-  const amanhaLabel = amanha.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 
   const contagemPressao = hourly.reduce<Record<string, number>>((acc, h) => {
     const nivel = nivelPressao(h.demand_pressure);
@@ -47,7 +51,7 @@ export function ForecastChart({ hourly, displayTimezone }: { hourly: HourlyPoint
     <div className="bg-panel border border-border rounded-card p-5">
       <p className="text-xs text-dim mb-2 font-mono">Passo 4</p>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-lg">Previsão de demanda — amanhã, {amanhaLabel} (24h)</h2>
+        <h2 className="font-display text-lg">Previsão de demanda — {janela.label}</h2>
         <span className="text-xs text-dim font-mono">{displayTimezone}</span>
       </div>
 

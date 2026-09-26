@@ -8,6 +8,7 @@ import { TariffPanel } from "@/components/TariffPanel";
 import { ForecastChart } from "@/components/ForecastChart";
 import { TariffComparisonChart } from "@/components/TariffComparisonChart";
 import { LoadShiftBar } from "@/components/LoadShiftBar";
+import { OptimizationSummary } from "@/components/OptimizationSummary";
 import { ReplayWindowPicker } from "@/components/ReplayWindowPicker";
 import { ApiError, getSimulationOptions, runSimulation } from "@/lib/api";
 import { REGIONS_DEMO, findRegionPreset } from "@/lib/regions";
@@ -89,9 +90,14 @@ export default function Dashboard() {
               · {agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </p>
           )}
-          <Link href="/pipeline" className="text-sm text-dim hover:text-text transition-colors">
-            Pipeline do modelo →
-          </Link>
+          <div className="flex gap-4">
+            <Link href="/verificacao" className="text-sm text-dim hover:text-text transition-colors">
+              Verificação →
+            </Link>
+            <Link href="/pipeline" className="text-sm text-dim hover:text-text transition-colors">
+              Pipeline do modelo →
+            </Link>
+          </div>
         </header>
 
         {/* Sidebar (contexto do cadastro — muda pouco) + conteúdo principal (dinâmico a cada consulta) */}
@@ -125,12 +131,13 @@ export default function Dashboard() {
             )}
             {simulacao && !carregando && !erro && (
               <>
-                <p className="text-xs text-dim -mb-2">
-                  Janela simulada confirmada pelo backend:{" "}
-                  <span className="font-mono text-text">{simulacao.window.label}</span>
-                </p>
-                <ForecastChart hourly={simulacao.hourly} displayTimezone={simulacao.display_timezone} />
+                <ForecastChart
+                  hourly={simulacao.hourly}
+                  displayTimezone={simulacao.display_timezone}
+                  janela={simulacao.window}
+                />
                 <TariffComparisonChart hourly={simulacao.hourly} differencePct={simulacao.difference_pct} />
+                <OptimizationSummary optimization={simulacao.optimization} />
                 <LoadShiftBar hourly={simulacao.hourly} />
               </>
             )}
