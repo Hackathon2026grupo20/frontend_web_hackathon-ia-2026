@@ -7,29 +7,52 @@ import { TariffPanel } from "@/components/TariffPanel";
 import { ForecastChart } from "@/components/ForecastChart";
 import { TariffComparisonChart } from "@/components/TariffComparisonChart";
 import { LoadShiftBar } from "@/components/LoadShiftBar";
-import { FILIAIS_DEMO, mockResolveLocation, mockSystemSignal, mockSimulacao, mockTarifaBase } from "@/lib/mockData";
+import { ApiError, runSimulation } from "@/lib/api";
+import { REGIONS_DEMO, findRegionPreset } from "@/lib/regions";
+import type { SimulationResponse } from "@/types/api";
 
-export default function Home() {
-  const [filialId, setFilialId] = useState(FILIAIS_DEMO[0].id);
+export default function Dashboard() {
+  const [regionId, setRegionId] = useState(REGIONS_DEMO[0].id);
   const [agora, setAgora] = useState<Date | null>(null);
+  const [simulacao, setSimulacao] = useState<SimulationResponse | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const preset = findRegionPreset(regionId);
 
   useEffect(() => {
     setAgora(new Date());
-    const id = setInterval(() => setAgora(new Date()), 60_000);
+    const id = setInterval(() => setAgora(new Date()), 1_000);
     return () => clearInterval(id);
   }, []);
 
-  const distribuidora = mockResolveLocation(filialId);
-  const tarifa = mockTarifaBase();
-  const signal = mockSystemSignal(distribuidora.subsistema);
-  const simulacao = mockSimulacao(distribuidora.subsistema);
+  useEffect(() => {
+    let cancelado = false;
+    setCarregando(true);
+    setErro(null);
+    runSimulation(preset.request)
+      .then((data) => {
+        if (!cancelado) setSimulacao(data);
+      })
+      .catch((e) => {
+        if (cancelado) return;
+        setSimulacao(null);
+        setErro(e instanceof ApiError ? e.message : "Não foi possível carregar a simulação.");
+      })
+      .finally(() => {
+        if (!cancelado) setCarregando(false);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [regionId]);
 
   return (
     <div data-theme="operacao" className="min-h-screen bg-bg text-text font-body">
       <div className="max-w-7xl mx-auto px-4 py-8 md:px-8">
         <header className="mb-8 flex items-start justify-between flex-wrap gap-2">
           <div>
-            <p className="text-xs text-dim font-mono mb-1">protótipo · dados mockados</p>
+            <p className="text-xs text-dim font-mono mb-1">dados da API Predicta</p>
             <h1 className="font-display font-extrabold text-2xl">Predicta</h1>
           </div>
           {agora && (
@@ -40,7 +63,7 @@ export default function Home() {
                 month: "2-digit",
                 year: "numeric",
               })}{" "}
-              · {agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+              · {agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </p>
           )}
         </header>
@@ -48,20 +71,43 @@ export default function Home() {
         {/* Sidebar (contexto do cadastro — muda pouco) + conteúdo principal (dinâmico a cada consulta) */}
         <div className="flex flex-col md:flex-row gap-6">
           <aside className="md:w-72 flex-shrink-0 flex flex-col gap-5">
-            <LocationPicker filialId={filialId} onChange={setFilialId} />
-            <DistributorCard data={distribuidora} />
-            <TariffPanel tarifa={tarifa} />
+            <LocationPicker regionId={regionId} onChange={setRegionId} />
+            <DistributorCard preset={preset} />
+            {simulacao && (
+              <TariffPanel
+                referenceMeanRsKwh={simulacao.reference_tariff_mean_rs_kwh}
+                dynamicMeanRsKwh={simulacao.dynamic_tariff_mean_rs_kwh}
+              />
+            )}
           </aside>
 
           <main className="flex-1 min-w-0 flex flex-col gap-5">
-            <ForecastChart signal={signal} />
-            <TariffComparisonChart sim={simulacao} />
-            <LoadShiftBar sim={simulacao} />
+            {carregando && (
+              <div className="bg-panel border border-border rounded-card p-5 text-sm text-dim">
+                Carregando simulação…
+              </div>
+            )}
+            {erro && !carregando && (
+              <div className="bg-panel border border-alert rounded-card p-5 text-sm text-alert">
+                {erro} — verifique se a API está disponível em{" "}
+                <code className="font-mono">
+                  {process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000"}
+                </code>
+                .
+              </div>
+            )}
+            {simulacao && !carregando && !erro && (
+              <>
+                <ForecastChart hourly={simulacao.hourly} displayTimezone={simulacao.display_timezone} />
+                <TariffComparisonChart hourly={simulacao.hourly} differencePct={simulacao.difference_pct} />
+                <LoadShiftBar hourly={simulacao.hourly} />
+              </>
+            )}
           </main>
         </div>
 
         <footer className="text-xs text-dim text-center pt-8 mt-4 border-t border-border">
-          Predicta · Hackathon COPPE IA 2026 — protótipo de interface, dados ilustrativos
+          Predicta · Hackathon COPPE IA 2026
         </footer>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import type { SimulacaoHora } from "@/types/api";
+import type { HourlyPoint } from "@/types/api";
 
 export interface Janela {
   inicio: string;
@@ -8,20 +8,20 @@ export interface Janela {
 
 // Acha a janela contígua de N horas com a menor (ou maior) média de multiplicador —
 // é o que responde "de qual horário pra qual horário transferir", não só "qual hora isolada".
-export function encontrarJanela(horas: SimulacaoHora[], tamanho: number, tipo: "melhor" | "pior"): Janela {
+export function encontrarJanela(horas: HourlyPoint[], tamanho: number, tipo: "melhor" | "pior"): Janela {
   let melhorIdx = 0;
   let melhorMedia = tipo === "melhor" ? Infinity : -Infinity;
   for (let i = 0; i <= horas.length - tamanho; i++) {
     const fatia = horas.slice(i, i + tamanho);
-    const media = fatia.reduce((s, h) => s + h.multiplicador, 0) / tamanho;
+    const media = fatia.reduce((s, h) => s + h.multiplier, 0) / tamanho;
     if ((tipo === "melhor" && media < melhorMedia) || (tipo === "pior" && media > melhorMedia)) {
       melhorMedia = media;
       melhorIdx = i;
     }
   }
   return {
-    inicio: horas[melhorIdx].hora,
-    fim: horas[Math.min(melhorIdx + tamanho, horas.length) % horas.length].hora,
+    inicio: horas[melhorIdx].time,
+    fim: horas[Math.min(melhorIdx + tamanho, horas.length) % horas.length].time,
     mediaMultiplicador: melhorMedia,
   };
 }

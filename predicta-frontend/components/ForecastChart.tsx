@@ -10,26 +10,36 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import type { SystemSignal } from "@/types/api";
+import type { HourlyPoint } from "@/types/api";
 
-export function ForecastChart({ signal }: { signal: SystemSignal }) {
-  const data = signal.previsao.map((p) => ({
-    hora: p.hora,
-    p10: p.p10,
-    banda: Number((p.p90 - p.p10).toFixed(1)),
-    p50: p.p50,
+const PRESSURE_COLOR: Record<string, string> = {
+  alta: "var(--accent-alert)",
+  media: "var(--accent-demand)",
+  baixa: "var(--accent-good)",
+};
+
+export function ForecastChart({ hourly, displayTimezone }: { hourly: HourlyPoint[]; displayTimezone: string }) {
+  const data = hourly.map((h) => ({
+    hora: h.time,
+    demanda: h.demand_p50_mw,
+    pressao: h.demand_pressure,
   }));
 
   const amanha = new Date();
   amanha.setDate(amanha.getDate() + 1);
   const amanhaLabel = amanha.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 
+  const contagemPressao = hourly.reduce<Record<string, number>>((acc, h) => {
+    acc[h.demand_pressure] = (acc[h.demand_pressure] ?? 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <div className="bg-panel border border-border rounded-card p-5">
       <p className="text-xs text-dim mb-2 font-mono">Passo 4</p>
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-display text-lg">Previsão de demanda — amanhã, {amanhaLabel} (24h)</h2>
-        <span className="text-xs text-dim font-mono">emitido {signal.issueTime.slice(11, 16)}</span>
+        <span className="text-xs text-dim font-mono">{displayTimezone}</span>
       </div>
 
       <ResponsiveContainer width="100%" height={220}>
@@ -40,40 +50,21 @@ export function ForecastChart({ signal }: { signal: SystemSignal }) {
           <Tooltip
             contentStyle={{ background: "var(--panel-2)", border: "1px solid var(--border)", borderRadius: 8 }}
           />
-          <Area dataKey="p10" stackId="a" stroke="none" fill="transparent" />
-          <Area
-            dataKey="banda"
-            stackId="a"
-            stroke="none"
-            fill="var(--accent-demand)"
-            fillOpacity={0.18}
-            name="faixa p10–p90"
-          />
-          <Line dataKey="p50" stroke="var(--accent-demand)" strokeWidth={2} dot={false} name="previsão (p50)" />
+          <Area dataKey="demanda" stroke="none" fill="var(--accent-demand)" fillOpacity={0.12} />
+          <Line dataKey="demanda" stroke="var(--accent-demand)" strokeWidth={2} dot={false} name="previsão (p50 MW)" />
         </ComposedChart>
       </ResponsiveContainer>
 
       <div className="grid grid-cols-3 gap-2 mt-3">
-        <div className="border border-border rounded-card px-3 py-2">
-          <p className="text-[11px] text-dim">D (pressão de demanda)</p>
-          <b className="glow-demand text-sm" style={{ color: "var(--accent-demand)" }}>{signal.d.toFixed(2)}</b>
-        </div>
-        <div className="border border-border rounded-card px-3 py-2">
-          <p className="text-[11px] text-dim">S (pressão de oferta)</p>
-          {signal.s === null ? (
-            <b className="glow-alert text-sm" style={{ color: "var(--accent-alert)" }}>sem fonte confiável</b>
-          ) : (
-            <b className="glow-good text-sm" style={{ color: "var(--accent-good)" }}>{signal.s.toFixed(2)}</b>
-          )}
-        </div>
-        <div className="border border-border rounded-card px-3 py-2">
-          <p className="text-[11px] text-dim">C (exposição climática)</p>
-          <b className="glow-climate text-sm" style={{ color: "var(--accent-climate)" }}>{signal.c.toFixed(2)}</b>
-        </div>
+        {(["alta", "media", "baixa"] as const).map((nivel) => (
+          <div key={nivel} className="border border-border rounded-card px-3 py-2">
+            <p className="text-[11px] text-dim capitalize">Pressão {nivel}</p>
+            <b className="text-sm" style={{ color: PRESSURE_COLOR[nivel] }}>
+              {contagemPressao[nivel] ?? 0}h
+            </b>
+          </div>
+        ))}
       </div>
-      {signal.qualityFlags.length > 0 && (
-        <p className="text-xs text-alert mt-2">⚠ {signal.qualityFlags.join(", ")}</p>
-      )}
     </div>
   );
 }

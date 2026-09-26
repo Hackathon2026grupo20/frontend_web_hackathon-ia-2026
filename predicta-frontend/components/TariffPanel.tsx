@@ -1,35 +1,25 @@
-interface TarifaBase {
-  teRsMwh: number;
-  tusdRsMwh: number;
-  totalRsKwh: number;
-  vigenciaInicio: string;
-  vigenciaFim: string | null;
-}
-
-export function TariffPanel({ tarifa }: { tarifa: TarifaBase }) {
+export function TariffPanel({
+  referenceMeanRsKwh,
+  dynamicMeanRsKwh,
+}: {
+  referenceMeanRsKwh: number;
+  dynamicMeanRsKwh: number;
+}) {
   return (
     <div className="bg-panel border border-border rounded-card p-5">
       <p className="text-xs text-dim mb-2 font-mono">Passo 3</p>
-      <h2 className="font-display text-lg mb-3">Tarifa vigente (ANEEL)</h2>
-      <div className="flex items-end gap-2 mb-3">
-        <span className="font-display text-3xl text-text">
-          R$ {tarifa.totalRsKwh.toFixed(5)}
-        </span>
-        <span className="text-sm text-dim mb-1">/ kWh</span>
-      </div>
+      <h2 className="font-display text-lg mb-3">Tarifa (média 24h)</h2>
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <p className="text-dim text-xs">TE</p>
-          <p className="font-mono">R$ {tarifa.teRsMwh.toFixed(2)}/MWh</p>
+          <p className="text-dim text-xs">Referência</p>
+          <p className="font-mono text-lg">R$ {referenceMeanRsKwh.toFixed(5)}</p>
         </div>
         <div>
-          <p className="text-dim text-xs">TUSD</p>
-          <p className="font-mono">R$ {tarifa.tusdRsMwh.toFixed(2)}/MWh</p>
+          <p className="text-dim text-xs">Dinâmica</p>
+          <p className="font-mono text-lg">R$ {dynamicMeanRsKwh.toFixed(5)}</p>
         </div>
       </div>
-      <p className="text-xs text-dim mt-3">
-        Componente volumétrica (TE+TUSD). Não inclui tributos, bandeiras ou demanda contratada.
-      </p>
+      <p className="text-xs text-dim mt-3">Médias das 24 horas simuladas, em R$/kWh.</p>
     </div>
   );
 }

@@ -1,15 +1,15 @@
 "use client";
 
-import type { SimulacaoResponse } from "@/types/api";
+import type { HourlyPoint } from "@/types/api";
 import { encontrarJanela, corPorMultiplicador } from "@/lib/loadShift";
 
-export function LoadShiftBar({ sim }: { sim: SimulacaoResponse }) {
-  const multiplicadores = sim.horas.map((h) => h.multiplicador);
+export function LoadShiftBar({ hourly }: { hourly: HourlyPoint[] }) {
+  const multiplicadores = hourly.map((h) => h.multiplier);
   const min = Math.min(...multiplicadores);
   const max = Math.max(...multiplicadores);
 
-  const janelaBoa = encontrarJanela(sim.horas, 3, "melhor");
-  const janelaRuim = encontrarJanela(sim.horas, 3, "pior");
+  const janelaBoa = encontrarJanela(hourly, 3, "melhor");
+  const janelaRuim = encontrarJanela(hourly, 3, "pior");
 
   return (
     <div className="bg-panel border border-border rounded-card p-5">
@@ -21,21 +21,14 @@ export function LoadShiftBar({ sim }: { sim: SimulacaoResponse }) {
 
       {/* Faixa de 24 horas, cor contínua de verde (bom) a vermelho (ruim) */}
       <div className="flex gap-[2px] h-10 rounded-card overflow-hidden">
-        {sim.horas.map((h) => (
+        {hourly.map((h) => (
           <div
-            key={h.hora}
+            key={h.time}
             className="flex-1"
             style={{
-              backgroundColor: corPorMultiplicador(
-                h.multiplicador,
-                min,
-                max,
-                "#39e67a",
-                "#ff4d3d",
-                "#2a3350"
-              ),
+              backgroundColor: corPorMultiplicador(h.multiplier, min, max, "#39e67a", "#ff4d3d", "#2a3350"),
             }}
-            title={`${h.hora} — multiplicador ${h.multiplicador.toFixed(2)}`}
+            title={`${h.time} — multiplicador ${h.multiplier.toFixed(2)}`}
           />
         ))}
       </div>
@@ -63,12 +56,6 @@ export function LoadShiftBar({ sim }: { sim: SimulacaoResponse }) {
           </span>
         </div>
       </div>
-
-      {sim.avisos.map((a) => (
-        <p key={a} className="text-xs text-dim border-t border-border pt-2 mt-4">
-          ⓘ {a}
-        </p>
-      ))}
     </div>
   );
 }

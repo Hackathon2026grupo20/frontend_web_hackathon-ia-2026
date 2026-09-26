@@ -1,32 +1,31 @@
 "use client";
 
-import { FILIAIS_DEMO } from "@/lib/mockData";
+import { REGIONS_DEMO } from "@/lib/regions";
 
 export function LocationPicker({
-  filialId,
+  regionId,
   onChange,
 }: {
-  filialId: string;
+  regionId: string;
   onChange: (id: string) => void;
 }) {
   return (
     <div className="bg-panel border border-border rounded-card p-5">
-      <p className="text-xs text-dim mb-2 font-mono">Filial</p>
-      <h2 className="font-display font-bold text-lg mb-3">Unidade cadastrada</h2>
+      <p className="text-xs text-dim mb-2 font-mono">Localidade</p>
+      <h2 className="font-display font-bold text-lg mb-3">Região</h2>
       <select
-        value={filialId}
+        value={regionId}
         onChange={(e) => onChange(e.target.value)}
         className="w-full bg-panel2 border border-border rounded-card px-3 py-2 text-text font-body"
       >
-        {FILIAIS_DEMO.map((f) => (
-          <option key={f.id} value={f.id}>
-            {f.nome}
+        {REGIONS_DEMO.map((r) => (
+          <option key={r.id} value={r.id}>
+            {r.label}
           </option>
         ))}
       </select>
       <p className="text-xs text-dim mt-2">
-        Local, distribuidora e subsistema vêm do cadastro do cliente — troque aqui só se a empresa tiver mais de uma
-        filial.
+        Distribuidora, tarifa e previsão de demanda vêm da localidade escolhida.
       </p>
     </div>
   );
