@@ -8,13 +8,18 @@ import { TariffPanel } from "@/components/TariffPanel";
 import { ForecastChart } from "@/components/ForecastChart";
 import { TariffComparisonChart } from "@/components/TariffComparisonChart";
 import { LoadShiftBar } from "@/components/LoadShiftBar";
-import { ApiError, runSimulation } from "@/lib/api";
+import { ReplayWindowPicker } from "@/components/ReplayWindowPicker";
+import { ApiError, getSimulationOptions, runSimulation } from "@/lib/api";
 import { REGIONS_DEMO, findRegionPreset } from "@/lib/regions";
-import type { SimulationResponse } from "@/types/api";
+import type { ReplayWindow, SimulationResponse } from "@/types/api";
 
 export default function Dashboard() {
   const [regionId, setRegionId] = useState(REGIONS_DEMO[0].id);
   const [agora, setAgora] = useState<Date | null>(null);
+
+  const [replayWindows, setReplayWindows] = useState<ReplayWindow[]>([]);
+  const [replayKey, setReplayKey] = useState(""); // "" = mais recente disponível (backend usa a última janela)
+
   const [simulacao, setSimulacao] = useState<SimulationResponse | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -27,11 +32,28 @@ export default function Dashboard() {
     return () => clearInterval(id);
   }, []);
 
+  // Ao trocar de região, busca as janelas de replay disponíveis e reseta pra "mais recente".
+  useEffect(() => {
+    let cancelado = false;
+    setReplayWindows([]);
+    setReplayKey("");
+    getSimulationOptions(preset.request.region, "replay")
+      .then((opts) => {
+        if (!cancelado) setReplayWindows(opts.replay_windows ?? []);
+      })
+      .catch(() => {
+        // Falha aqui não é crítica — o formulário de simulação ainda tenta rodar com a janela mais recente.
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [regionId]);
+
   useEffect(() => {
     let cancelado = false;
     setCarregando(true);
     setErro(null);
-    runSimulation(preset.request)
+    runSimulation({ ...preset.request, replay_key: replayKey || undefined })
       .then((data) => {
         if (!cancelado) setSimulacao(data);
       })
@@ -46,7 +68,7 @@ export default function Dashboard() {
     return () => {
       cancelado = true;
     };
-  }, [regionId]);
+  }, [regionId, replayKey]);
 
   return (
     <div data-theme="operacao" className="min-h-screen bg-bg text-text font-body">
@@ -77,6 +99,7 @@ export default function Dashboard() {
           <aside className="md:w-72 flex-shrink-0 flex flex-col gap-5">
             <LocationPicker regionId={regionId} onChange={setRegionId} />
             <DistributorCard preset={preset} />
+            <ReplayWindowPicker windows={replayWindows} replayKey={replayKey} onChange={setReplayKey} />
             {simulacao && (
               <TariffPanel
                 referenceMeanRsKwh={simulacao.reference_tariff_mean_rs_kwh}
@@ -102,6 +125,10 @@ export default function Dashboard() {
             )}
             {simulacao && !carregando && !erro && (
               <>
+                <p className="text-xs text-dim -mb-2">
+                  Janela simulada confirmada pelo backend:{" "}
+                  <span className="font-mono text-text">{simulacao.window.label}</span>
+                </p>
                 <ForecastChart hourly={simulacao.hourly} displayTimezone={simulacao.display_timezone} />
                 <TariffComparisonChart hourly={simulacao.hourly} differencePct={simulacao.difference_pct} />
                 <LoadShiftBar hourly={simulacao.hourly} />

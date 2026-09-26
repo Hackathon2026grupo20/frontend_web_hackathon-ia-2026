@@ -64,9 +64,9 @@ async function requestRaw<T>(path: string, init: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function getSimulationOptions(region: string) {
+export function getSimulationOptions(region: string, mode: string = "replay") {
   return request<SimulationOptionsResponse>(
-    `/api/v1/simulations/options/?region=${encodeURIComponent(region)}`
+    `/api/v1/simulations/options/?region=${encodeURIComponent(region)}&mode=${encodeURIComponent(mode)}`
   );
 }
 

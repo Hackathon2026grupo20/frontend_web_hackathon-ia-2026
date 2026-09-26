@@ -6,12 +6,23 @@ export interface RegionOption {
   available: boolean;
 }
 
+export interface ReplayWindow {
+  key: string; // = issue_time_utc; é o que volta no POST como "replay_key"
+  label: string; // ex.: "15/12/2025 · 00h–23h"
+  local_date: string; // "2025-12-15"
+  local_start: string;
+  local_end: string;
+  timezone: string;
+  source: string;
+  issue_time_utc: string;
+}
+
 export interface SimulationOptionsResponse {
   region: string;
   mode: string;
-  effective_date: string;
-  operational_status: string;
-  replay_windows: unknown;
+  effective_date: string | null;
+  operational_status: { available: boolean; reason?: string } | string;
+  replay_windows: ReplayWindow[];
   simulation_available: boolean;
   display_timezone: string;
   regions: RegionOption[];
@@ -38,6 +49,7 @@ export interface SimulationRequest {
   customer_type: string;
   mode: string;
   flexible_pct: number;
+  replay_key?: string; // key de um ReplayWindow — se omitido, o backend usa a última janela disponível
 }
 
 export interface HourlyPoint {
@@ -60,7 +72,7 @@ export interface SimulationResponse {
   customer: Record<string, unknown>;
   concession: Record<string, unknown>;
   optimization: Record<string, unknown>;
-  window: Record<string, unknown>;
+  window: ReplayWindow;
   hourly: HourlyPoint[];
   simulation_mode: string;
   display_timezone: string;
