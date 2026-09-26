@@ -84,10 +84,23 @@ export interface HourlyPoint {
   delta_pct: number;
 }
 
+// Bloco optimization — ver optimize_flexible_consumption() no backend (mesmos campos usados no Studio).
+export interface OptimizationResult {
+  flexible_percent?: number;
+  flexible_energy_kwh?: number;
+  actually_shifted_kwh?: number;
+  original_dynamic_cost_24h_rs?: number;
+  optimized_dynamic_cost_24h_rs?: number;
+  potential_savings_24h_rs?: number;
+  potential_savings_pct?: number;
+  potential_savings_month_rs?: number;
+  [key: string]: unknown;
+}
+
 export interface SimulationResponse {
   customer: Record<string, unknown>;
   concession: DistributorInfo | null;
-  optimization: Record<string, unknown>;
+  optimization: OptimizationResult;
   window: Record<string, unknown>;
   hourly: HourlyPoint[];
   simulation_mode: string;

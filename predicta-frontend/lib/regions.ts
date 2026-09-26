@@ -1,7 +1,8 @@
-import type { CustomerType, SimulationMode } from "@/types/api";
+import type { SimulationMode } from "@/types/api";
 
 // Presets de região + CNPJ da concessão pra simplificar o formulário: o usuário só escolhe a
-// localidade. distributor_id e tariff_profile_id NÃO ficam fixos aqui — o backend valida os
+// localidade. O perfil de consumo (kWh/mês, tipo, % flexível) vem do plano (lib/plans.ts).
+// distributor_id e tariff_profile_id NÃO ficam fixos aqui — o backend valida os
 // dois contra a tabela ANEEL, então eles são buscados em GET /api/v1/catalog/profiles/
 // (ver lib/simulation.ts). IDs de região confirmados contra GET /api/v1/simulations/options/.
 export interface RegionPreset {
@@ -9,18 +10,10 @@ export interface RegionPreset {
   label: string;
   cnpj: string;
   distributorLabel: string;
-  monthly_kwh: number;
-  customer_type: CustomerType;
   mode: SimulationMode;
-  flexible_pct: number;
 }
 
-const DEFAULTS = {
-  monthly_kwh: 350,
-  customer_type: "residential",
-  mode: "replay",
-  flexible_pct: 20,
-} as const;
+const DEFAULTS = { mode: "replay" } as const;
 
 export const REGIONS_DEMO: RegionPreset[] = [
   {
@@ -40,7 +33,7 @@ export const REGIONS_DEMO: RegionPreset[] = [
   {
     id: "S",
     label: "Sul (CELESC)",
-    cnpj: "83878892000155",
+    cnpj: "08336783000190",
     distributorLabel: "CELESC",
     ...DEFAULTS,
   },
