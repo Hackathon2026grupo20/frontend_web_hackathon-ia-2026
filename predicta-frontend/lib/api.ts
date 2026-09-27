@@ -1,13 +1,10 @@
 import type {
   ApiErrorBody,
   CatalogProfilesResponse,
-  DatasetUploadResponse,
-  PipelineRun,
-  PipelineStage,
+  DistributionAreasResponse,
   SimulationOptionsResponse,
   SimulationRequest,
   SimulationResponse,
-  UploadDataset,
 } from "@/types/api";
 
 // Sem autenticação hoje: a API é pública, tudo por região (+ CNPJ da distribuidora).
@@ -66,27 +63,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// Sem Content-Type fixo — o navegador define o boundary do multipart sozinho.
-async function requestRaw<T>(path: string, init: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`, init);
-
-  if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const body = (await res.json()) as ApiErrorBody;
-      detail = body.detail ?? detail;
-    } catch {
-      // corpo não era JSON — mantém o statusText
-    }
-    throw new ApiError(res.status, detail);
-  }
-
-  return res.json() as Promise<T>;
-}
-
 export function getSimulationOptions(region: string, mode: string = "replay") {
   const path = `/api/v1/simulations/options/?region=${encodeURIComponent(region)}&mode=${encodeURIComponent(mode)}`;
   return withCache(`GET ${path}`, () => request<SimulationOptionsResponse>(path));
+}
+
+// Catálogo de distribuidoras. Vem com a geometria das áreas de concessão (~570 KB, servidos
+// com compressão), então é buscado uma vez por sessão e fica no cache por chave fixa.
+export function getDistributionAreas() {
+  const path = `/api/v1/catalog/distribution-areas/`;
+  return withCache(`GET ${path}`, () => request<DistributionAreasResponse>(path));
 }
 
 export function getCatalogProfiles(cnpj: string, region: string) {
@@ -103,29 +89,4 @@ export function runSimulation(payload: SimulationRequest) {
       body: JSON.stringify(payload),
     })
   );
-}
-
-export function getPipelineStages() {
-  return request<PipelineStage[]>(`/api/v1/pipeline/stages/`);
-}
-
-export function runPipelineStage(stageId: string, params: Record<string, string>) {
-  return request<{ id: string; status: string }>(`/api/v1/pipeline/stages/${encodeURIComponent(stageId)}/run/`, {
-    method: "POST",
-    body: JSON.stringify({ params }),
-  });
-}
-
-export function getPipelineRun(runId: string) {
-  return request<PipelineRun>(`/api/v1/pipeline/runs/${encodeURIComponent(runId)}/`);
-}
-
-// Sobrescreve o dataset direto no backend, sem merge nem validação de schema — usar com cuidado.
-export function uploadDataset(dataset: UploadDataset, file: File) {
-  const form = new FormData();
-  form.append("file", file);
-  return requestRaw<DatasetUploadResponse>(`/api/v1/data/uploads/${dataset}/`, {
-    method: "POST",
-    body: form,
-  });
 }

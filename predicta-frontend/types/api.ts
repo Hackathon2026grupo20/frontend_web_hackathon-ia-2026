@@ -53,6 +53,29 @@ export interface DistributorInfo {
   [key: string]: unknown;
 }
 
+// GET /api/v1/catalog/distribution-areas/ — GeoJSON das áreas de concessão ANEEL.
+// É a única listagem de distribuidoras que a API expõe: 103 áreas, cada uma com o CNPJ que
+// catalog/profiles/ exige. A geometria (polígono da área) não é usada aqui.
+export interface DistributionAreaProperties {
+  cnpj_digits: string;
+  cnpj: string;
+  sigla: string;
+  razao_social: string;
+  uf: string;
+  regiao: string;
+  subsystem_id: string; // mesmos ids do seletor de região: N, NE, SE/CO, S
+  tipo_outorga: string; // CONCESSIONÁRIA | PERMISSIONÁRIA
+  num_unidades_consumidoras?: number;
+  num_municipios?: number;
+  [key: string]: unknown;
+}
+
+export interface DistributionAreasResponse {
+  type: string;
+  features: { type: string; properties: DistributionAreaProperties; geometry?: unknown }[];
+  [key: string]: unknown;
+}
+
 // Item de catalog/profiles — ver tariff_profiles_for_cnpj() em services/distribution.py.
 export interface TariffProfile {
   id: string;
@@ -163,56 +186,4 @@ export interface SimulationResponse {
 
 export interface ApiErrorBody {
   detail: string;
-}
-
-// Pipeline de retreino / engenharia de features — GET /api/v1/pipeline/stages/,
-// POST /api/v1/pipeline/stages/<id>/run/, GET /api/v1/pipeline/runs/<id>/.
-
-export type PipelineParamKind = "select" | "number" | "date" | "text" | "checkbox";
-
-export interface PipelineParam {
-  name: string;
-  label: string;
-  kind: PipelineParamKind;
-  default: string;
-  help?: string;
-  choices: [string, string][];
-  required: boolean;
-}
-
-export interface PipelineStageRequirement {
-  key: string;
-  label: string;
-  exists: boolean;
-}
-
-export interface PipelineStage {
-  id: string;
-  section: string;
-  title: string;
-  summary: string;
-  explanation: string;
-  why: string;
-  status: string;
-  required: PipelineStageRequirement[];
-  outputs: unknown[];
-  params: PipelineParam[];
-}
-
-export type PipelineRunStatus = "PENDING" | "RUNNING" | "SUCCESS" | "FAILED";
-
-export interface PipelineRun {
-  id: string;
-  status: PipelineRunStatus;
-  log_tail: string;
-  error_message?: string | null;
-  [key: string]: unknown;
-}
-
-export type UploadDataset = "load" | "supply" | "tariffs" | "climate_e3";
-
-export interface DatasetUploadResponse {
-  rows: number;
-  columns: string[];
-  path: string;
 }
