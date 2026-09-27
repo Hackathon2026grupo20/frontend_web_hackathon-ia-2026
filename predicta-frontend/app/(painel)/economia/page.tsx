@@ -5,8 +5,6 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 import { EstadoSimulacao } from "@/components/AppShell";
 import { useCliente } from "@/components/ClienteProvider";
 import { FeatureGate } from "@/components/FeatureGate";
-import { calcularEquivalencias } from "@/lib/equipamentos";
-import { proximoPlano } from "@/lib/plans";
 import { dataLocal, horaLocal } from "@/lib/format";
 import { baixarRelatorioCsv } from "@/lib/relatorio";
 
@@ -31,13 +29,6 @@ export default function Economia() {
     .map((h) => h.consumption_kwh - h.optimized_consumption_kwh)
     .filter((r) => r > 1e-6);
   const kwAliviado = reducoes.length ? reducoes.reduce((s, r) => s + r, 0) / reducoes.length : 0;
-
-  // Dicionário: quanta energia a economia do mês "compra" na tarifa-base
-  const kwhEquivalente = economiaMes / sim.reference_tariff_mean_rs_kwh;
-  const equivalencias = calcularEquivalencias(kwhEquivalente);
-  const visiveis = equivalencias.slice(0, plano.equivalencias);
-  const ocultas = equivalencias.length - visiveis.length;
-  const upgrade = proximoPlano(plano, (p) => p.equivalencias > plano.equivalencias);
 
   const periodo = sim.hourly.length ? dataLocal(sim.hourly[0]) : "";
   const curva = sim.hourly.map((h) => ({
@@ -70,37 +61,6 @@ export default function Economia() {
         <Kpi rotulo="Energia deslocada" valor={`${num(deslocadoKwh)} kWh`} detalhe={`de ${num(flexivelKwh)} kWh flexíveis/dia`} />
         <Kpi rotulo="Alívio no pico" valor={`${num(kwAliviado)} kW`} detalhe={`média em ${reducoes.length}h com carga reduzida`} />
       </div>
-
-      <section className="bg-panel border border-border rounded-card p-5">
-        <p className="text-xs text-dim font-mono mb-1">Dicionário da economia</p>
-        <h2 className="font-display text-lg mb-1">Sua economia no mês equivale a…</h2>
-        <p className="text-xs text-dim mb-4">
-          {brl(economiaMes)} ÷ {brl(sim.reference_tariff_mean_rs_kwh)}/kWh (tarifa-base) ≈ {num(kwhEquivalente, 0)} kWh.
-          Consumos de referência aproximados.
-        </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {visiveis.map((e) => (
-            <div key={e.id} className="border border-border rounded-card p-4">
-              <p className="text-2xl mb-2" aria-hidden>
-                {e.icone}
-              </p>
-              <p className="font-display text-xl" style={{ color: "var(--accent-good)" }}>
-                {e.unidade(e.quantidade)}
-              </p>
-              <p className="text-xs text-dim mt-1">{e.descricao}</p>
-            </div>
-          ))}
-        </div>
-        {ocultas > 0 && upgrade && (
-          <p className="text-xs text-dim mt-3">
-            🔒 Mais {ocultas} equivalências no{" "}
-            <Link href="/planos" className="text-brand underline">
-              plano {upgrade.nome}
-            </Link>
-            .
-          </p>
-        )}
-      </section>
 
       <FeatureGate recurso="economiaDetalhada">
         <section className="bg-panel border border-border rounded-card p-5">

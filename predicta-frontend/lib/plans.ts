@@ -6,10 +6,8 @@ export type PlanoId = "pequeno" | "medio" | "grande";
 export type Recurso =
   | "previsao24h"
   | "comparacaoTarifa"
-  | "faixaDeslocamento"
   | "economiaResumo"
   | "economiaDetalhada"
-  | "equivalenciasCompletas"
   | "preClimatizacao"
   | "alertasTempoReal"
   | "exportarRelatorio"
@@ -24,7 +22,6 @@ export interface Plano {
   perfil: { monthly_kwh: number; customer_type: CustomerType; flexible_pct: number };
   avisosPorDia: number; // Infinity = sem limite
   canaisAviso: string;
-  equivalencias: number; // quantas equivalências do dicionário aparecem
   unidades: string;
   cargasFlexiveis: number; // equipamentos flexíveis que o cliente pode cadastrar
   recursos: Recurso[];
@@ -41,7 +38,6 @@ export const PLANOS: Record<PlanoId, Plano> = {
     perfil: { monthly_kwh: 3_000, customer_type: "commercial", flexible_pct: 15 },
     avisosPorDia: 2,
     canaisAviso: "a cada 12h · app e e-mail",
-    equivalencias: 3,
     unidades: "1 unidade",
     cargasFlexiveis: 3,
     recursos: BASE,
@@ -54,10 +50,9 @@ export const PLANOS: Record<PlanoId, Plano> = {
     perfil: { monthly_kwh: 40_000, customer_type: "commercial", flexible_pct: 25 },
     avisosPorDia: 8,
     canaisAviso: "a partir de 3 em 3h · app e e-mail",
-    equivalencias: 8,
     unidades: "até 5 unidades",
     cargasFlexiveis: 10,
-    recursos: [...BASE, "faixaDeslocamento", "economiaDetalhada", "equivalenciasCompletas", "preClimatizacao"],
+    recursos: [...BASE, "economiaDetalhada", "preClimatizacao"],
   },
   grande: {
     id: "grande",
@@ -67,14 +62,11 @@ export const PLANOS: Record<PlanoId, Plano> = {
     perfil: { monthly_kwh: 500_000, customer_type: "industrial_flat", flexible_pct: 30 },
     avisosPorDia: Infinity,
     canaisAviso: "a partir de 1 em 1h · app, e-mail, SMS e webhook",
-    equivalencias: Infinity,
     unidades: "unidades ilimitadas",
     cargasFlexiveis: Infinity,
     recursos: [
       ...BASE,
-      "faixaDeslocamento",
       "economiaDetalhada",
-      "equivalenciasCompletas",
       "preClimatizacao",
       "alertasTempoReal",
       "exportarRelatorio",
@@ -105,10 +97,8 @@ export function proximoPlano(atual: Plano, melhor: (p: Plano) => boolean): Plano
 export const LABEL_RECURSO: Record<Recurso, string> = {
   previsao24h: "Previsão de demanda 24h",
   comparacaoTarifa: "Tarifa-base × tarifa dinâmica",
-  faixaDeslocamento: "Faixa de deslocamento de carga (pico → vale)",
   economiaResumo: "Resumo de economia (R$ e kWh)",
   economiaDetalhada: "Economia detalhada com curva otimizada",
-  equivalenciasCompletas: "Dicionário completo de equivalências",
   preClimatizacao: "Pré-climatização inteligente",
   alertasTempoReal: "Avisos de hora em hora, por SMS e webhook",
   exportarRelatorio: "Exportar relatório (CSV)",

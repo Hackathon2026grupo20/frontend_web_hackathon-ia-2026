@@ -14,8 +14,7 @@ export function ReplayWindowPicker({
   if (windows.length === 0) return null;
 
   return (
-    <div className="bg-panel border border-border rounded-card p-5">
-      <p className="text-xs text-dim mb-2 font-mono">Passo 3.5 · replay</p>
+    <div className="bg-panel border border-border rounded-card p-4">
       <h2 className="font-display font-bold text-lg mb-3">Dia simulado</h2>
       <select
         value={replayKey}
@@ -29,10 +28,6 @@ export function ReplayWindowPicker({
           </option>
         ))}
       </select>
-      <p className="text-xs text-dim mt-2">
-        Modo replay: reexibe um dia histórico como se fosse a previsão do dia seguinte — só pra teste/demo, já que o
-        modo operacional (H01–H24 a partir de agora) ainda não está publicado nesta região.
-      </p>
     </div>
   );
 }

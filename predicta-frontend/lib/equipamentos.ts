@@ -1,41 +1,7 @@
 import type { CustomerType } from "@/types/api";
 
-// Referências de consumo típicas (aproximadas) — usadas no dicionário de equivalências
-// e nas recomendações. Não substituem a medição do equipamento real do cliente.
-
-export interface Equivalencia {
-  id: string;
-  icone: string;
-  kwhPorUnidade: number;
-  unidade: (n: number) => string; // "2,5 horas", "12 banhos"...
-  descricao: string;
-}
-
-function fmt(n: number, casas = 1) {
-  return n.toLocaleString("pt-BR", { maximumFractionDigits: n >= 100 ? 0 : casas });
-}
-
-export const EQUIVALENCIAS: Equivalencia[] = [
-  { id: "ar", icone: "❄️", kwhPorUnidade: 1.1, unidade: (n) => `${fmt(n)} h`, descricao: "de ar-condicionado split 12.000 BTU ligado" },
-  { id: "banho", icone: "🚿", kwhPorUnidade: 0.92, unidade: (n) => `${fmt(n, 0)} banhos`, descricao: "de 10 min com chuveiro elétrico (5,5 kW)" },
-  { id: "carro", icone: "🚗", kwhPorUnidade: 0.17, unidade: (n) => `${fmt(n, 0)} km`, descricao: "rodados com um carro elétrico compacto" },
-  { id: "geladeira", icone: "🧊", kwhPorUnidade: 1.2, unidade: (n) => `${fmt(n)} dias`, descricao: "de uma geladeira frost-free funcionando" },
-  { id: "notebook", icone: "💻", kwhPorUnidade: 0.06, unidade: (n) => `${fmt(n, 0)} h`, descricao: "de notebook em uso" },
-  { id: "led", icone: "💡", kwhPorUnidade: 0.009, unidade: (n) => `${fmt(n, 0)} h`, descricao: "de uma lâmpada LED de 9 W acesa" },
-  { id: "celular", icone: "🔋", kwhPorUnidade: 0.015, unidade: (n) => `${fmt(n, 0)} cargas`, descricao: "completas de celular" },
-  { id: "casa", icone: "🏠", kwhPorUnidade: 165, unidade: (n) => `${fmt(n)} meses`, descricao: "de consumo de uma residência média brasileira (~165 kWh/mês)" },
-];
-
-export function calcularEquivalencias(kwh: number) {
-  return EQUIVALENCIAS.map((e) => ({ ...e, quantidade: kwh / e.kwhPorUnidade }))
-    // mostra primeiro o que dá um número "palpável" (nem 0,01 nem 1 milhão)
-    .sort((a, b) => score(a.quantidade) - score(b.quantidade));
-}
-
-function score(q: number) {
-  if (q < 0.5) return 100 + (0.5 - q);
-  return Math.abs(Math.log10(q) - 1.3); // ~20 unidades é o ponto ideal
-}
+// Catálogo de tarefas deslocáveis: ponto de partida do cadastro de carga flexível do cliente.
+// Valores aproximados — não substituem a medição do equipamento real.
 
 // Tarefas deslocáveis: duração, potência e horário em que costumam ser feitas.
 export interface Tarefa {

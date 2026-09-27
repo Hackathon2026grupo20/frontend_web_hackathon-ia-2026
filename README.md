@@ -13,7 +13,6 @@ npm run dev  # inicia o servidor de desenvolvimento (http://localhost:3000)
 Variáveis em `predicta-frontend/.env.local`:
 
 - `NEXT_PUBLIC_API_BASE_URL` — URL da API Predicta (padrão `http://127.0.0.1:8000`). O backend precisa liberar CORS para a origem do frontend.
-- `NEXT_PUBLIC_USE_MOCK` — `1` faz o dashboard usar dados sintéticos gerados no navegador, sem chamar a API (útil enquanto o backend não tem tarifas ANEEL e `system_signal_v1` carregados). A tela avisa que são dados de exemplo.
 
 ## Telas
 
@@ -25,6 +24,16 @@ O login é um protótipo de demonstração — qualquer e-mail e senha dão aces
 
 ![Tela de login](docs/screenshots/login.png)
 
-Já autenticado, o cliente acompanha no dashboard a previsão de demanda das próximas 24h e os indicadores de pressão do sistema (demanda, oferta e exposição climática) para a filial selecionada:
+Já autenticado, o cliente acompanha no dashboard os avisos do dia, a agenda dos equipamentos flexíveis e a comparação entre a tarifa-base e a tarifa dinâmica das 24h simuladas:
 
 ![Dashboard com previsão de demanda](docs/screenshots/dashboard.png)
+
+> A captura acima é anterior à reorganização do painel (ainda mostra o gráfico de demanda e o seletor de região) — precisa ser refeita.
+
+## Estrutura
+
+O painel do cliente fica sob `app/(painel)/`, com o `AppShell` (cabeçalho, abas e sino de avisos) e o `ClienteProvider`, que centraliza plano, contrato, carga flexível e a simulação vigente. As páginas são: **Painel**, **Carga flexível**, **Economia**, **Recomendações**, **Notificações**, **Perfil** e **Planos**.
+
+Enquanto não existe cadastro nem login de verdade, os dados da empresa usuária ficam em `lib/usuario.ts` e aparecem em **/perfil** — é de lá que saem a distribuidora, o subsistema e o consumo contratado, então o painel não pede essas escolhas. Distribuidora e dia simulado podem ser trocados em /perfil, num bloco marcado como exclusivo da demonstração.
+
+Há ainda `/verificacao`, uma tela técnica que mostra o request e a resposta crus da API lado a lado com os números recalculados no frontend. Ela fica **fora do menu de propósito** e é acessada só pela URL direta.
