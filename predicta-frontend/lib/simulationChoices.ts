@@ -11,3 +11,7 @@ export type CustomerType = (typeof CUSTOMER_TYPES)[number]["value"];
 export const FLEXIBLE_PCT_MIN = 0;
 export const FLEXIBLE_PCT_MAX = 80;
 export const MONTHLY_KWH_MIN = 1;
+
+// Defaults do formulário de verificação (o painel do cliente usa os valores do plano/carga).
+export const MONTHLY_KWH_DEFAULT = 350;
+export const FLEXIBLE_PCT_DEFAULT = 20;

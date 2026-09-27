@@ -1,4 +1,5 @@
 import type { HourlyPoint } from "@/types/api";
+import { horaLocal } from "@/lib/format";
 
 export interface Janela {
   inicio: string;
@@ -19,9 +20,12 @@ export function encontrarJanela(horas: HourlyPoint[], tamanho: number, tipo: "me
       melhorIdx = i;
     }
   }
+  // fim = início da hora seguinte à janela (a última janela termina 1h após o último ponto)
+  const ultima = horas[Math.min(melhorIdx + tamanho, horas.length) - 1];
+  const fimHora = (Number(ultima.local_iso.slice(11, 13)) + 1) % 24;
   return {
-    inicio: horas[melhorIdx].time,
-    fim: horas[Math.min(melhorIdx + tamanho, horas.length) % horas.length].time,
+    inicio: horaLocal(horas[melhorIdx]),
+    fim: `${String(fimHora).padStart(2, "0")}h`,
     mediaMultiplicador: melhorMedia,
   };
 }

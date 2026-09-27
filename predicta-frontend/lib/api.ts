@@ -12,7 +12,7 @@ import type {
 
 // Sem autenticação hoje: a API é pública, tudo por região (+ CNPJ da distribuidora).
 // Ver contexto completo em docs internos — endpoints sob /api/v1/, sem auth.
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
 
 export class ApiError extends Error {
   status: number;
@@ -24,8 +24,9 @@ export class ApiError extends Error {
 }
 
 // TTL curto pra evitar martelar o backend (Render free tier dorme e demora ~50-60s pra acordar)
-// com requests repetidas/idênticas disparadas por re-render, StrictMode ou navegação de volta.
-// Não é cache de dado "pra sempre" — só absorve rajadas de chamadas iguais em uma janela curta.
+// com requests repetidas/idênticas disparadas por re-render, StrictMode ou navegação entre as
+// páginas do painel (dashboard/economia/carga/recomendações podem pedir a mesma simulação).
+// Não é cache de dado "pra sempre" — só absorve rajadas de chamadas iguais numa janela curta.
 const CACHE_TTL_MS = 20_000;
 const cache = new Map<string, { expiresAt: number; promise: Promise<unknown> }>();
 
@@ -94,7 +95,8 @@ export function getCatalogProfiles(cnpj: string, region: string) {
 }
 
 export function runSimulation(payload: SimulationRequest) {
-  // Determinístico pro mesmo payload (mesma região/perfil/consumo/replay_key) — cachear é seguro.
+  // Determinístico pro mesmo payload (mesma região/perfil/consumo/flexible_pct/replay_key) —
+  // cachear é seguro; qualquer edição do cliente (carga, plano) muda o payload e gera nova chave.
   return withCache(`POST /simulations ${JSON.stringify(payload)}`, () =>
     request<SimulationResponse>(`/api/v1/simulations/`, {
       method: "POST",

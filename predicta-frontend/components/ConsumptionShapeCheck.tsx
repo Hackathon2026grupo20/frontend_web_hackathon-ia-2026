@@ -43,7 +43,7 @@ export function ConsumptionShapeCheck({
   const custoOriginal = hourly.reduce((s, h) => s + h.consumption_kwh * h.dynamic_rs_kwh, 0);
   const custoOtimizado = hourly.reduce((s, h) => s + h.optimized_consumption_kwh * h.dynamic_rs_kwh, 0);
   const economiaEstimada = custoOriginal - custoOtimizado;
-  const diffEconomia = Math.abs(economiaEstimada - optimization.potential_savings_24h_rs);
+  const diffEconomia = Math.abs(economiaEstimada - (optimization.potential_savings_24h_rs ?? 0));
   const economiaBate = diffEconomia < 0.05;
 
   return (
@@ -76,7 +76,7 @@ export function ConsumptionShapeCheck({
         <div className={`border rounded-card px-3 py-2 ${economiaBate ? "border-good bg-good/10" : "border-alert bg-alert/10"}`}>
           <p className="text-[11px] text-dim">optimization.potential_savings_24h_rs (API)</p>
           <b className={`text-sm font-mono ${economiaBate ? "text-good" : "text-alert"}`}>
-            R$ {optimization.potential_savings_24h_rs.toFixed(2)} {economiaBate ? "· ✓ bate" : `· Δ ${diffEconomia.toFixed(2)}`}
+            R$ {(optimization.potential_savings_24h_rs ?? 0).toFixed(2)} {economiaBate ? "· ✓ bate" : `· Δ ${diffEconomia.toFixed(2)}`}
           </b>
         </div>
       </div>
@@ -84,7 +84,7 @@ export function ConsumptionShapeCheck({
       <p className="text-xs text-dim mt-3">
         &quot;Esperado&quot; vem de um array de coeficientes fixo copiado do backend (motor_tarifa/customer/profiles.py) —
         não existe endpoint que exponha isso cru. Já a curva otimizada é o optimized_consumption_kwh que a própria
-        API devolve (resultado de deslocar {optimization.flexible_percent.toFixed(0)}% da carga pras horas mais
+        API devolve (resultado de deslocar {(optimization.flexible_percent ?? 0).toFixed(0)}% da carga pras horas mais
         baratas); a economia acima é recalculada de forma independente aqui só pra conferir consistência com o
         resumo que o backend já entrega.
       </p>

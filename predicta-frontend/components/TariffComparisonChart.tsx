@@ -11,6 +11,7 @@ import {
   Legend,
 } from "recharts";
 import type { HourlyPoint } from "@/types/api";
+import { horaLocal } from "@/lib/format";
 
 export function TariffComparisonChart({
   hourly,
@@ -31,9 +32,12 @@ export function TariffComparisonChart({
       </div>
 
       <ResponsiveContainer width="100%" height={220}>
-        <LineChart data={hourly} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+        <LineChart
+          data={hourly.map((h) => ({ ...h, hora: horaLocal(h) }))}
+          margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-          <XAxis dataKey="time" tick={{ fontSize: 11, fill: "var(--text-dim)" }} interval={2} />
+          <XAxis dataKey="hora"tick={{ fontSize: 11, fill: "var(--text-dim)" }} interval={2} />
           <YAxis tick={{ fontSize: 11, fill: "var(--text-dim)" }} domain={["auto", "auto"]} />
           <Tooltip
             contentStyle={{ background: "var(--panel-2)", border: "1px solid var(--border)", borderRadius: 8 }}

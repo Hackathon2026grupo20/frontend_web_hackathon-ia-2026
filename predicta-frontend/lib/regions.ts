@@ -1,80 +1,53 @@
-import type { SimulationRequest } from "@/types/api";
+import type { SimulationMode } from "@/types/api";
 
-// Presets de região + distribuidora/CNPJ pra simplificar o formulário: o usuário só escolhe a
-// localidade, o resto do payload (cnpj, distributor, profile, monthly_kwh, customer_type,
-// flexible_pct) fica com defaults fixos aqui, sem aparecer na UI.
-// IDs de região confirmados contra GET /api/v1/simulations/options/ (regions: N, NE, SE/CO, S).
+// Presets de região + CNPJ da concessão pra simplificar o formulário: o usuário só escolhe a
+// localidade. O perfil de consumo (kWh/mês, tipo, % flexível) vem do plano (lib/plans.ts).
+// distributor_id e tariff_profile_id NÃO ficam fixos aqui — o backend valida os
+// dois contra a tabela ANEEL, então eles são buscados em GET /api/v1/catalog/profiles/
+// (ver lib/simulation.ts). IDs de região confirmados contra GET /api/v1/simulations/options/.
 //
-// SE/CO (Enel RJ) foi validado de ponta a ponta contra o backend local:
-// - "distributor" precisa ser o distributor_id da tarifa (ex.: "ENEL RJ"), não a razão social.
-// - "profile" precisa ser o id completo pipe-delimited de GET /api/v1/catalog/profiles/
-//   (ex.: "B1|Convencional|Residencial|Residencial|Tarifa de Aplicação"), não um slug inventado.
-//
-// NE, S e N ainda NÃO têm 24h operacionais publicadas em system_signal_v1 (mesmo no backend
-// local) — simulation_available fica false pra essas regiões, então cnpj/distributor/profile
-// abaixo são placeholders não confirmados. Ajustar quando o backend publicar dados pra elas.
+// SE/CO (Enel RJ) é a única região validada ponta a ponta contra o backend. NE, S e N ainda NÃO
+// têm 24h operacionais publicadas em system_signal_v1 (mesmo no backend local) — simulation_available
+// fica false pra essas regiões, então os CNPJs abaixo são placeholders não confirmados e
+// catalog/profiles/ pode devolver profiles:[] vazio. Ajustar quando o backend publicar dados.
 export interface RegionPreset {
   id: string;
   label: string;
-  request: SimulationRequest;
+  cnpj: string;
+  distributorLabel: string;
+  mode: SimulationMode;
 }
+
+const DEFAULTS = { mode: "replay" } as const;
 
 export const REGIONS_DEMO: RegionPreset[] = [
   {
     id: "SE/CO",
     label: "Sudeste/Centro-Oeste (Enel RJ — Rio de Janeiro)",
-    request: {
-      cnpj: "33050071000158",
-      region: "SE/CO",
-      distributor: "ENEL RJ",
-      profile: "B1|Convencional|Residencial|Residencial|Tarifa de Aplicação",
-      monthly_kwh: 350,
-      customer_type: "residential",
-      mode: "replay",
-      flexible_pct: 20,
-    },
+    cnpj: "33050071000158",
+    distributorLabel: "Enel RJ",
+    ...DEFAULTS,
   },
   {
     id: "NE",
     label: "Nordeste (Enel CE — Fortaleza)",
-    request: {
-      cnpj: "07047251000170",
-      region: "NE",
-      distributor: "ENEL CE",
-      profile: "residencial_padrao", // catalog/profiles/ devolve profiles:[] vazio pra esse cnpj/região — sem id real pra usar ainda
-      monthly_kwh: 350,
-      customer_type: "residential",
-      mode: "replay",
-      flexible_pct: 20,
-    },
+    cnpj: "07047251000170",
+    distributorLabel: "Enel CE",
+    ...DEFAULTS,
   },
   {
     id: "S",
     label: "Sul (CELESC)",
-    request: {
-      cnpj: "83878892000155",
-      region: "S",
-      distributor: "CELESC",
-      profile: "residencial_padrao",
-      monthly_kwh: 350,
-      customer_type: "residential",
-      mode: "replay",
-      flexible_pct: 20,
-    },
+    cnpj: "08336783000190",
+    distributorLabel: "CELESC",
+    ...DEFAULTS,
   },
   {
     id: "N",
     label: "Norte",
-    request: {
-      cnpj: "04895728000180",
-      region: "N",
-      distributor: "Equatorial",
-      profile: "residencial_padrao",
-      monthly_kwh: 350,
-      customer_type: "residential",
-      mode: "replay",
-      flexible_pct: 20,
-    },
+    cnpj: "04895728000180",
+    distributorLabel: "Equatorial",
+    ...DEFAULTS,
   },
 ];
 

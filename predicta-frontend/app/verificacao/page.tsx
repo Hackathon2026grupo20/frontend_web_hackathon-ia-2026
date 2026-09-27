@@ -9,7 +9,16 @@ import { ConsumptionShapeCheck } from "@/components/ConsumptionShapeCheck";
 import { LoadShiftBar } from "@/components/LoadShiftBar";
 import { ApiError, getCatalogProfiles, runSimulation } from "@/lib/api";
 import { REGIONS_DEMO, findRegionPreset } from "@/lib/regions";
-import { CUSTOMER_TYPES, FLEXIBLE_PCT_MAX, FLEXIBLE_PCT_MIN, MONTHLY_KWH_MIN, type CustomerType } from "@/lib/simulationChoices";
+import {
+  CUSTOMER_TYPES,
+  FLEXIBLE_PCT_DEFAULT,
+  FLEXIBLE_PCT_MAX,
+  FLEXIBLE_PCT_MIN,
+  MONTHLY_KWH_DEFAULT,
+  MONTHLY_KWH_MIN,
+  type CustomerType,
+} from "@/lib/simulationChoices";
+import { escolherPerfilTarifa } from "@/lib/simulation";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import type { CatalogProfilesResponse, SimulationRequest, SimulationResponse } from "@/types/api";
 
@@ -34,12 +43,13 @@ export default function Verificacao() {
   const [regionId, setRegionId] = useState(REGIONS_DEMO[0].id);
   const preset = findRegionPreset(regionId);
 
-  // Controles interativos — começam no default do preset, mas o usuário pode variar livremente
+  // Controles interativos — começam nos defaults, mas o usuário pode variar livremente
   // pra comparar diferentes perfis tarifários e tipos de uso contra o que está no Django.
-  const [profileId, setProfileId] = useState(preset.request.profile);
+  // profileId começa vazio: o id válido só é conhecido depois de GET /catalog/profiles/.
+  const [profileId, setProfileId] = useState("");
   const [customerType, setCustomerType] = useState<CustomerType>("residential");
-  const [monthlyKwh, setMonthlyKwh] = useState(preset.request.monthly_kwh);
-  const [flexiblePct, setFlexiblePct] = useState(preset.request.flexible_pct);
+  const [monthlyKwh, setMonthlyKwh] = useState(MONTHLY_KWH_DEFAULT);
+  const [flexiblePct, setFlexiblePct] = useState(FLEXIBLE_PCT_DEFAULT);
 
   // Debounce nos controles "contínuos" (slider/número) — sem isso, arrastar o slider dispararia
   // uma request por pixel contra um backend que pode estar acordando de um cold start.
@@ -54,20 +64,23 @@ export default function Verificacao() {
   const [carregandoSim, setCarregandoSim] = useState(true);
   const [erroSim, setErroSim] = useState<string | null>(null);
 
-  // Troca de região: busca o catálogo de perfis dessa distribuidora e reseta os controles pro
-  // default do preset (o profile de outra distribuidora não existe aqui).
+  // Troca de região: busca o catálogo de perfis dessa distribuidora e reseta os controles pros
+  // defaults (o profile de outra distribuidora não existe aqui).
   useEffect(() => {
     let cancelado = false;
     setCarregandoCatalogo(true);
     setErroCatalogo(null);
-    setProfileId(preset.request.profile);
+    setProfileId("");
     setCustomerType("residential");
-    setMonthlyKwh(preset.request.monthly_kwh);
-    setFlexiblePct(preset.request.flexible_pct);
+    setMonthlyKwh(MONTHLY_KWH_DEFAULT);
+    setFlexiblePct(FLEXIBLE_PCT_DEFAULT);
 
-    getCatalogProfiles(preset.request.cnpj, preset.request.region)
+    getCatalogProfiles(preset.cnpj, preset.id)
       .then((res) => {
-        if (!cancelado) setCatalogo(res);
+        if (cancelado) return;
+        setCatalogo(res);
+        // Mesma escolha que o painel do cliente faz (convencional do subgrupo, sem variantes).
+        setProfileId(escolherPerfilTarifa(res.profiles, "residential")?.id ?? "");
       })
       .catch((e) => {
         if (!cancelado) setErroCatalogo(e instanceof ApiError ? `${e.status}: ${e.message}` : "Falha ao consultar o catálogo.");
@@ -83,9 +96,14 @@ export default function Verificacao() {
 
   // Usa os valores debounçados no request de verdade — os "ao vivo" (monthlyKwh/flexiblePct)
   // só alimentam o input controlado e o gráfico local (ConsumptionShapeCheck), que não bate na API.
+  // distributor_id vem do perfil escolhido no catálogo — o backend valida o par contra a ANEEL.
+  const perfilSelecionado = catalogo?.profiles.find((p) => p.id === profileId) ?? null;
   const request: SimulationRequest = {
-    ...preset.request,
+    cnpj: preset.cnpj,
+    region: preset.id,
+    distributor: perfilSelecionado?.distributor_id ?? "",
     profile: profileId,
+    mode: preset.mode,
     customer_type: customerType,
     monthly_kwh: monthlyKwhDebounced,
     flexible_pct: flexiblePctDebounced,
@@ -93,6 +111,7 @@ export default function Verificacao() {
 
   // Roda a simulação sempre que qualquer controle (já debounçado) mudar.
   useEffect(() => {
+    if (!profileId) return; // sem perfil tarifário válido o backend rejeita o request
     let cancelado = false;
     setCarregandoSim(true);
     setErroSim(null);
@@ -113,8 +132,6 @@ export default function Verificacao() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [regionId, profileId, customerType, monthlyKwhDebounced, flexiblePctDebounced]);
-
-  const perfilSelecionado = catalogo?.profiles.find((p) => p.id === profileId) ?? null;
 
   return (
     <div data-theme="operacao" className="min-h-screen bg-bg text-text font-body">
@@ -225,17 +242,17 @@ export default function Verificacao() {
             <Section title="2 · Distribuidora">
               <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
                 <p>
-                  <span className="text-dim">Sigla:</span> <b>{catalogo.distributor.sigla}</b>
+                  <span className="text-dim">Sigla:</span> <b>{catalogo.distributor?.sigla}</b>
                 </p>
                 <p>
-                  <span className="text-dim">Razão social:</span> {catalogo.distributor.razao_social}
+                  <span className="text-dim">Razão social:</span> {catalogo.distributor?.razao_social}
                 </p>
                 <p>
-                  <span className="text-dim">CNPJ:</span> <span className="font-mono">{catalogo.distributor.cnpj}</span>
+                  <span className="text-dim">CNPJ:</span> <span className="font-mono">{catalogo.distributor?.cnpj}</span>
                 </p>
                 <p>
-                  <span className="text-dim">UF / Subsistema:</span> {catalogo.distributor.uf} /{" "}
-                  {catalogo.distributor.subsystem_id}
+                  <span className="text-dim">UF / Subsistema:</span> {catalogo.distributor?.uf} /{" "}
+                  {catalogo.distributor?.subsystem_id}
                 </p>
               </div>
             </Section>
@@ -285,7 +302,7 @@ export default function Verificacao() {
                   </p>
                   <p>
                     <span className="text-dim">Consumo diário (calculado):</span>{" "}
-                    <b>{simulacao.customer.daily_consumption_kwh.toFixed(2)} kWh</b>
+                    <b>{(simulacao.customer.daily_consumption_kwh ?? 0).toFixed(2)} kWh</b>
                   </p>
                   <p>
                     <span className="text-dim">Janela simulada:</span> {simulacao.window.label}
@@ -312,7 +329,7 @@ export default function Verificacao() {
               <ForecastChart
                 hourly={simulacao.hourly}
                 displayTimezone={simulacao.display_timezone}
-                janela={simulacao.window}
+                mode={simulacao.simulation_mode}
               />
               <TariffComparisonChart hourly={simulacao.hourly} differencePct={simulacao.difference_pct} />
               <OptimizationSummary optimization={simulacao.optimization} />

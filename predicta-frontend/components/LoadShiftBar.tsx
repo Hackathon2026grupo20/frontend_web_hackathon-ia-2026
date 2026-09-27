@@ -2,6 +2,7 @@
 
 import type { HourlyPoint } from "@/types/api";
 import { encontrarJanela, corPorMultiplicador } from "@/lib/loadShift";
+import { horaLocal } from "@/lib/format";
 
 export function LoadShiftBar({ hourly }: { hourly: HourlyPoint[] }) {
   const multiplicadores = hourly.map((h) => h.multiplier);
@@ -10,6 +11,9 @@ export function LoadShiftBar({ hourly }: { hourly: HourlyPoint[] }) {
 
   const janelaBoa = encontrarJanela(hourly, 3, "melhor");
   const janelaRuim = encontrarJanela(hourly, 3, "pior");
+
+  // A janela simulada pode não começar à meia-noite: marcas a cada 6h a partir do primeiro ponto.
+  const marcas = [0, 6, 12, 18, hourly.length - 1].filter((i) => i < hourly.length).map((i) => horaLocal(hourly[i]));
 
   return (
     <div className="bg-panel border border-border rounded-card p-5">
@@ -23,7 +27,7 @@ export function LoadShiftBar({ hourly }: { hourly: HourlyPoint[] }) {
       <div className="flex gap-[2px] h-10 rounded-card overflow-hidden">
         {hourly.map((h) => (
           <div
-            key={h.time}
+            key={h.interval_start_utc}
             className="flex-1"
             style={{
               backgroundColor: corPorMultiplicador(h.multiplier, min, max, "#39e67a", "#ff4d3d", "#2a3350"),
@@ -33,11 +37,9 @@ export function LoadShiftBar({ hourly }: { hourly: HourlyPoint[] }) {
         ))}
       </div>
       <div className="flex justify-between text-[10px] text-dim mt-1 font-mono">
-        <span>00h</span>
-        <span>06h</span>
-        <span>12h</span>
-        <span>18h</span>
-        <span>23h</span>
+        {marcas.map((m, i) => (
+          <span key={i}>{m}</span>
+        ))}
       </div>
 
       {/* Leitura direta: de onde pra onde transferir */}
