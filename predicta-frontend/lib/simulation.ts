@@ -23,7 +23,7 @@ const VARIANTE = /pré-pagamento|SCEE|baixa renda|distribuição|cooperativa|irr
 
 // O backend só aceita distributor_id/tariff_profile_id que existam na tabela ANEEL para o CNPJ,
 // então o perfil vem de catalog/profiles: o convencional do subgrupo do cliente, sem variantes.
-function escolherPerfilTarifa(profiles: TariffProfile[], tipo: CustomerType): TariffProfile | undefined {
+export function escolherPerfilTarifa(profiles: TariffProfile[], tipo: CustomerType): TariffProfile | undefined {
   const padrao = profiles.filter((p) => !VARIANTE.test(p.label) && p.subgroup.startsWith("B"));
   return (
     padrao.find((p) => p.subgroup === SUBGRUPO[tipo] && /convencional/i.test(p.modality)) ??
@@ -32,7 +32,11 @@ function escolherPerfilTarifa(profiles: TariffProfile[], tipo: CustomerType): Ta
   );
 }
 
-export async function simularRegiao(preset: RegionPreset, perfil: PerfilConsumo): Promise<SimulationResult> {
+export async function simularRegiao(
+  preset: RegionPreset,
+  perfil: PerfilConsumo,
+  replayKey?: string
+): Promise<SimulationResult> {
   if (USE_MOCK) {
     return { simulation: mockSimulation(preset, perfil), profile: null, distributor: null, mock: true };
   }
@@ -55,6 +59,8 @@ export async function simularRegiao(preset: RegionPreset, perfil: PerfilConsumo)
     customer_type: perfil.customer_type,
     mode: preset.mode,
     flexible_pct: perfil.flexible_pct,
+    // "" = janela mais recente disponível (o backend escolhe)
+    replay_key: replayKey || undefined,
   });
   return { simulation, profile: perfilTarifa, distributor: catalogo.distributor, mock: false };
 }

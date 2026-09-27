@@ -9,11 +9,12 @@ import { LoadShiftBar } from "@/components/LoadShiftBar";
 import { AlertsPanel } from "@/components/AlertsPanel";
 import { AgendaCard } from "@/components/AgendaCard";
 import { FeatureGate } from "@/components/FeatureGate";
+import { ReplayWindowPicker } from "@/components/ReplayWindowPicker";
 import { EstadoSimulacao } from "@/components/AppShell";
 import { useCliente } from "@/components/ClienteProvider";
 
 export default function Dashboard() {
-  const { preset, setRegionId, resultado, carregando, erro } = useCliente();
+  const { preset, setRegionId, replayWindows, replayKey, setReplayKey, resultado, carregando, erro } = useCliente();
   const simulacao = resultado?.simulation ?? null;
 
   return (
@@ -26,6 +27,7 @@ export default function Dashboard() {
           distributor={resultado?.distributor ?? simulacao?.concession ?? null}
           profile={resultado?.profile ?? null}
         />
+        <ReplayWindowPicker windows={replayWindows} replayKey={replayKey} onChange={setReplayKey} />
         {simulacao && (
           <TariffPanel
             referenceMeanRsKwh={simulacao.reference_tariff_mean_rs_kwh}

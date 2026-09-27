@@ -15,6 +15,9 @@ const ABAS = [
   { href: "/recomendacoes", label: "Recomendações" },
   { href: "/notificacoes", label: "Notificações" },
   { href: "/planos", label: "Planos" },
+  // Telas técnicas (fora do painel do cliente): conferência dos números e retreino do modelo.
+  { href: "/verificacao", label: "Verificação" },
+  { href: "/pipeline", label: "Pipeline" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

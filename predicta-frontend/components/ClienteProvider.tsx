@@ -1,18 +1,23 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { getSimulationOptions } from "@/lib/api";
 import { PLANOS, type Plano, type PlanoId } from "@/lib/plans";
 import { REGIONS_DEMO, findRegionPreset, type RegionPreset } from "@/lib/regions";
-import { simularRegiao, type SimulationResult } from "@/lib/simulation";
+import { simularRegiao, USE_MOCK, type SimulationResult } from "@/lib/simulation";
 import { ajustarAoPlano, preferenciasPadrao, type PreferenciasNotificacao } from "@/lib/notificacoes";
 import { cargaPadrao, pctFlexivel, type CargaConfig } from "@/lib/cargaFlexivel";
 import type { PerfilConsumo } from "@/lib/mock";
+import type { ReplayWindow } from "@/types/api";
 
 interface ClienteState {
   plano: Plano;
   setPlano: (id: PlanoId) => void;
   preset: RegionPreset;
   setRegionId: (id: string) => void;
+  replayWindows: ReplayWindow[];
+  replayKey: string; // "" = janela mais recente disponível
+  setReplayKey: (key: string) => void;
   resultado: SimulationResult | null;
   carregando: boolean;
   erro: string | null;
@@ -46,6 +51,8 @@ function gravarStorage(chave: string, valor: string) {
 export function ClienteProvider({ children }: { children: React.ReactNode }) {
   const [planoId, setPlanoId] = useState<PlanoId>("medio");
   const [regionId, setRegionIdState] = useState(REGIONS_DEMO[0].id);
+  const [replayWindows, setReplayWindows] = useState<ReplayWindow[]>([]);
+  const [replayKey, setReplayKey] = useState(""); // "" = mais recente (o backend usa a última janela)
   const [resultado, setResultado] = useState<SimulationResult | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -91,6 +98,24 @@ export function ClienteProvider({ children }: { children: React.ReactNode }) {
     }
   }, [planoId]);
 
+  // Ao trocar de região, busca as janelas de replay disponíveis e volta pra "mais recente".
+  useEffect(() => {
+    if (USE_MOCK) return;
+    let cancelado = false;
+    setReplayWindows([]);
+    setReplayKey("");
+    getSimulationOptions(preset.id, preset.mode)
+      .then((opts) => {
+        if (!cancelado) setReplayWindows(opts.replay_windows ?? []);
+      })
+      .catch(() => {
+        // Falha aqui não é crítica — a simulação ainda roda com a janela mais recente.
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [regionId]);
+
   const perfil: PerfilConsumo = {
     monthly_kwh: carga.monthly_kwh,
     customer_type: carga.customer_type,
@@ -102,7 +127,7 @@ export function ClienteProvider({ children }: { children: React.ReactNode }) {
     let cancelado = false;
     setCarregando(true);
     setErro(null);
-    simularRegiao(preset, perfil)
+    simularRegiao(preset, perfil, replayKey)
       .then((data) => {
         if (!cancelado) setResultado(data);
       })
@@ -124,7 +149,7 @@ export function ClienteProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelado = true;
     };
-  }, [regionId, chavePerfil]);
+  }, [regionId, chavePerfil, replayKey]);
 
   const value: ClienteState = {
     plano,
@@ -137,6 +162,9 @@ export function ClienteProvider({ children }: { children: React.ReactNode }) {
       setRegionIdState(id);
       gravarStorage("predicta-regiao", id);
     },
+    replayWindows,
+    replayKey,
+    setReplayKey,
     resultado,
     carregando,
     erro,

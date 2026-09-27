@@ -5,6 +5,11 @@ import type { SimulationMode } from "@/types/api";
 // distributor_id e tariff_profile_id NÃO ficam fixos aqui — o backend valida os
 // dois contra a tabela ANEEL, então eles são buscados em GET /api/v1/catalog/profiles/
 // (ver lib/simulation.ts). IDs de região confirmados contra GET /api/v1/simulations/options/.
+//
+// SE/CO (Enel RJ) é a única região validada ponta a ponta contra o backend. NE, S e N ainda NÃO
+// têm 24h operacionais publicadas em system_signal_v1 (mesmo no backend local) — simulation_available
+// fica false pra essas regiões, então os CNPJs abaixo são placeholders não confirmados e
+// catalog/profiles/ pode devolver profiles:[] vazio. Ajustar quando o backend publicar dados.
 export interface RegionPreset {
   id: string;
   label: string;
@@ -18,9 +23,9 @@ const DEFAULTS = { mode: "replay" } as const;
 export const REGIONS_DEMO: RegionPreset[] = [
   {
     id: "SE/CO",
-    label: "Sudeste/Centro-Oeste (Light — Rio de Janeiro)",
-    cnpj: "60444437000146",
-    distributorLabel: "Light",
+    label: "Sudeste/Centro-Oeste (Enel RJ — Rio de Janeiro)",
+    cnpj: "33050071000158",
+    distributorLabel: "Enel RJ",
     ...DEFAULTS,
   },
   {
