@@ -1,7 +1,6 @@
 import type { CustomerType } from "@/types/api";
-import type { PlanoId } from "@/lib/plans";
-import { PLANOS } from "@/lib/plans";
 import { TAREFAS, type Tarefa } from "@/lib/equipamentos";
+import { USUARIO } from "@/lib/usuario";
 
 // Carga flexível declarada pelo cliente: o que ele consegue ligar em outro horário sem prejudicar
 // a operação. É daqui que sai o % flexível enviado para a simulação.
@@ -58,19 +57,16 @@ export function itemDoCatalogo(t: Tarefa, quantidade = 1): ItemCarga {
   };
 }
 
-// Carga inicial típica por porte, só como ponto de partida — o cliente edita tudo.
-const PADRAO: Record<PlanoId, [string, number][]> = {
-  pequeno: [["agua", 1], ["loucas", 1]],
-  medio: [["agua", 2], ["loucas", 2], ["camara", 2], ["veiculos", 2], ["lote", 1]],
-  grande: [["veiculos", 20], ["compressor", 10], ["camara", 10], ["bomba", 10], ["lote", 5]],
-};
-
-export function cargaPadrao(plano: PlanoId): CargaConfig {
-  const perfil = PLANOS[plano].perfil;
+// Ponto de partida da carga: o consumo e os equipamentos declarados pela usuária (lib/usuario.ts),
+// não o plano — trocar de assinatura não muda o tamanho da operação do cliente.
+export function cargaPadrao(): CargaConfig {
   return {
-    monthly_kwh: perfil.monthly_kwh,
-    customer_type: perfil.customer_type,
-    itens: PADRAO[plano].map(([id, qtd]) => itemDoCatalogo(TAREFAS.find((t) => t.id === id)!, qtd)),
+    monthly_kwh: USUARIO.consumo.monthly_kwh,
+    customer_type: USUARIO.consumo.customer_type,
+    itens: USUARIO.cargaInicial.flatMap(([id, qtd]) => {
+      const tarefa = TAREFAS.find((t) => t.id === id);
+      return tarefa ? [itemDoCatalogo(tarefa, qtd)] : [];
+    }),
   };
 }
 

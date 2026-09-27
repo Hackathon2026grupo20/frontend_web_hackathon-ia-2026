@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ForecastChart } from "@/components/ForecastChart";
 import { TariffComparisonChart } from "@/components/TariffComparisonChart";
 import { OptimizationSummary } from "@/components/OptimizationSummary";
 import { ConsumptionShapeCheck } from "@/components/ConsumptionShapeCheck";
-import { LoadShiftBar } from "@/components/LoadShiftBar";
 import { ApiError, getCatalogProfiles, runSimulation } from "@/lib/api";
+import {
+  distribuidorasDaRegiao,
+  listarDistribuidoras,
+  rotuloDistribuidora,
+  type Distribuidora,
+} from "@/lib/distribuidoras";
 import { REGIONS_DEMO, findRegionPreset } from "@/lib/regions";
 import {
   CUSTOMER_TYPES,
@@ -46,6 +50,11 @@ export default function Verificacao() {
   // Controles interativos — começam nos defaults, mas o usuário pode variar livremente
   // pra comparar diferentes perfis tarifários e tipos de uso contra o que está no Django.
   // profileId começa vazio: o id válido só é conhecido depois de GET /catalog/profiles/.
+  // Distribuidora escolhida. Começa na do preset da região e o usuário pode trocar por qualquer
+  // uma das 103 do catálogo ANEEL — é o CNPJ dela que busca os perfis tarifários.
+  const [cnpjEscolhido, setCnpjEscolhido] = useState(preset.cnpj);
+  const [distribuidoras, setDistribuidoras] = useState<Distribuidora[]>([]);
+
   const [profileId, setProfileId] = useState("");
   const [customerType, setCustomerType] = useState<CustomerType>("residential");
   const [monthlyKwh, setMonthlyKwh] = useState(MONTHLY_KWH_DEFAULT);
@@ -64,8 +73,33 @@ export default function Verificacao() {
   const [carregandoSim, setCarregandoSim] = useState(true);
   const [erroSim, setErroSim] = useState<string | null>(null);
 
-  // Troca de região: busca o catálogo de perfis dessa distribuidora e reseta os controles pros
-  // defaults (o profile de outra distribuidora não existe aqui).
+  // Catálogo de distribuidoras: uma vez por sessão, não depende dos controles.
+  useEffect(() => {
+    let cancelado = false;
+    listarDistribuidoras()
+      .then((ds) => {
+        if (!cancelado) setDistribuidoras(ds);
+      })
+      .catch(() => {
+        // Sem a lista o seletor cai para a distribuidora do preset — nada mais deixa de funcionar.
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
+  const daRegiao = distribuidorasDaRegiao(distribuidoras, regionId);
+  // Valor efetivo em vez de reset por efeito: ao trocar de região, o CNPJ de outra região deixa
+  // de valer na hora, sem uma renderização intermediária pedindo um par (cnpj, região) inválido.
+  const cnpj =
+    daRegiao.some((d) => d.cnpj === cnpjEscolhido) || daRegiao.length === 0
+      ? cnpjEscolhido
+      : daRegiao.some((d) => d.cnpj === preset.cnpj)
+        ? preset.cnpj
+        : daRegiao[0].cnpj;
+
+  // Troca de distribuidora (ou de região): busca os perfis tarifários desse CNPJ e reseta os
+  // controles pros defaults, porque o profile de outra distribuidora não existe aqui.
   useEffect(() => {
     let cancelado = false;
     setCarregandoCatalogo(true);
@@ -75,7 +109,7 @@ export default function Verificacao() {
     setMonthlyKwh(MONTHLY_KWH_DEFAULT);
     setFlexiblePct(FLEXIBLE_PCT_DEFAULT);
 
-    getCatalogProfiles(preset.cnpj, preset.id)
+    getCatalogProfiles(cnpj, regionId)
       .then((res) => {
         if (cancelado) return;
         setCatalogo(res);
@@ -92,15 +126,15 @@ export default function Verificacao() {
     return () => {
       cancelado = true;
     };
-  }, [regionId]);
+  }, [cnpj, regionId]);
 
   // Usa os valores debounçados no request de verdade — os "ao vivo" (monthlyKwh/flexiblePct)
   // só alimentam o input controlado e o gráfico local (ConsumptionShapeCheck), que não bate na API.
   // distributor_id vem do perfil escolhido no catálogo — o backend valida o par contra a ANEEL.
   const perfilSelecionado = catalogo?.profiles.find((p) => p.id === profileId) ?? null;
   const request: SimulationRequest = {
-    cnpj: preset.cnpj,
-    region: preset.id,
+    cnpj,
+    region: regionId,
     distributor: perfilSelecionado?.distributor_id ?? "",
     profile: profileId,
     mode: preset.mode,
@@ -131,7 +165,7 @@ export default function Verificacao() {
       cancelado = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [regionId, profileId, customerType, monthlyKwhDebounced, flexiblePctDebounced]);
+  }, [regionId, cnpj, profileId, customerType, monthlyKwhDebounced, flexiblePctDebounced]);
 
   return (
     <div data-theme="operacao" className="min-h-screen bg-bg text-text font-body">
@@ -148,7 +182,7 @@ export default function Verificacao() {
 
         <div className="bg-panel border border-border rounded-card p-5 mb-5 grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm mb-1.5">Região / distribuidora</label>
+            <label className="block text-sm mb-1.5">Região (subsistema)</label>
             <select
               value={regionId}
               onChange={(e) => setRegionId(e.target.value)}
@@ -160,6 +194,45 @@ export default function Verificacao() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1.5">
+              Distribuidora{" "}
+              {daRegiao.length > 0 && <span className="text-xs text-dim font-mono">({daRegiao.length} na região)</span>}
+            </label>
+            <select
+              value={cnpj}
+              onChange={(e) => setCnpjEscolhido(e.target.value)}
+              disabled={daRegiao.length === 0}
+              className="w-full bg-panel2 border border-border rounded-card px-3 py-2 text-text disabled:opacity-50"
+            >
+              {daRegiao.length === 0 ? (
+                <option value={cnpj}>{preset.distributorLabel} (catálogo não carregado)</option>
+              ) : (
+                <>
+                  <optgroup label="Concessionárias">
+                    {daRegiao
+                      .filter((d) => d.concessionaria)
+                      .map((d) => (
+                        <option key={d.cnpj} value={d.cnpj}>
+                          {rotuloDistribuidora(d)}
+                        </option>
+                      ))}
+                  </optgroup>
+                  <optgroup label="Permissionárias (cooperativas)">
+                    {daRegiao
+                      .filter((d) => !d.concessionaria)
+                      .map((d) => (
+                        <option key={d.cnpj} value={d.cnpj}>
+                          {rotuloDistribuidora(d)}
+                        </option>
+                      ))}
+                  </optgroup>
+                </>
+              )}
+            </select>
+            <p className="text-xs text-dim mt-1.5 font-mono">CNPJ {cnpj}</p>
           </div>
 
           <div>
@@ -177,9 +250,17 @@ export default function Verificacao() {
                   </option>
                 ))
               ) : (
-                <option value={profileId}>{profileId}</option>
+                <option value="">
+                  {carregandoCatalogo ? "consultando…" : "nenhum perfil tarifário publicado para este CNPJ"}
+                </option>
               )}
             </select>
+            {!carregandoCatalogo && catalogo && catalogo.profiles.length === 0 && (
+              <p className="text-xs text-dim mt-1.5">
+                A distribuidora existe no catálogo ANEEL, mas o backend não tem tarifas processadas para ela — sem
+                perfil não há tarifa e a simulação não roda.
+              </p>
+            )}
           </div>
 
           <div>
@@ -326,11 +407,6 @@ export default function Verificacao() {
                 </p>
               </Section>
 
-              <ForecastChart
-                hourly={simulacao.hourly}
-                displayTimezone={simulacao.display_timezone}
-                mode={simulacao.simulation_mode}
-              />
               <TariffComparisonChart hourly={simulacao.hourly} differencePct={simulacao.difference_pct} />
               <OptimizationSummary optimization={simulacao.optimization} />
               <ConsumptionShapeCheck
@@ -339,7 +415,6 @@ export default function Verificacao() {
                 customerType={customerType}
                 optimization={simulacao.optimization}
               />
-              <LoadShiftBar hourly={simulacao.hourly} />
             </>
           )}
         </div>

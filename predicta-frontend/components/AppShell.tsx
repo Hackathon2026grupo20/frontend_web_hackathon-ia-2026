@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCliente } from "@/components/ClienteProvider";
 import { ORDEM_PLANOS, PLANOS, type PlanoId } from "@/lib/plans";
-import { USE_MOCK } from "@/lib/simulation";
 import { NotificationBell } from "@/components/NotificationBell";
 
 const ABAS = [
@@ -14,15 +13,15 @@ const ABAS = [
   { href: "/economia", label: "Economia" },
   { href: "/recomendacoes", label: "Recomendações" },
   { href: "/notificacoes", label: "Notificações" },
+  { href: "/perfil", label: "Perfil" },
   { href: "/planos", label: "Planos" },
-  // Telas técnicas (fora do painel do cliente): conferência dos números e retreino do modelo.
-  { href: "/verificacao", label: "Verificação" },
-  { href: "/pipeline", label: "Pipeline" },
+  // /verificacao existe e funciona, mas fica fora do menu de propósito: é tela de conferência
+  // técnica dos números da API, acessada só por URL direta.
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { plano, setPlano } = useCliente();
+  const { plano, setPlano, usuario } = useCliente();
   const [agora, setAgora] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -33,15 +32,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div data-theme="operacao" className="min-h-screen bg-bg text-text font-body">
-      <div className="max-w-7xl mx-auto px-4 py-6 md:px-8">
-        <header className="mb-6 flex items-start justify-between flex-wrap gap-3">
+      <div className="max-w-7xl mx-auto px-4 py-4 md:px-8">
+        <header className="mb-4 flex items-start justify-between flex-wrap gap-3">
           <div>
-            <p className="text-xs text-dim font-mono mb-1">
-              {USE_MOCK ? "dados de exemplo (sem API)" : "dados da API Predicta"}
-            </p>
             <Link href="/dashboard" className="font-display font-extrabold text-2xl">
               Predicta
             </Link>
+            <p className="text-xs text-dim mt-0.5">
+              <Link href="/perfil" className="hover:text-text transition-colors">
+                {usuario.nomeFantasia} · {usuario.unidade}
+              </Link>
+            </p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             {agora && (
@@ -70,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <nav className="flex gap-1 border-b border-border mb-6 overflow-x-auto" aria-label="Seções">
+        <nav className="flex gap-1 border-b border-border mb-4 overflow-x-auto" aria-label="Seções">
           {ABAS.map((a) => {
             const ativa = pathname === a.href;
             return (
@@ -89,7 +90,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {children}
 
-        <footer className="text-xs text-dim text-center pt-8 mt-8 border-t border-border">
+        <footer className="text-xs text-dim text-center pt-4 mt-4 border-t border-border">
           Predicta · Hackathon COPPE IA 2026 · tarifa dinâmica experimental, não é fatura regulada
         </footer>
       </div>
@@ -97,17 +98,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Estados comuns de carregamento/erro/aviso de mock, usados por todas as páginas do painel.
+// Estados comuns de carregamento e erro, usados por todas as páginas do painel.
 export function EstadoSimulacao() {
   const { carregando, erro } = useCliente();
   return (
     <>
-      {USE_MOCK && (
-        <div className="bg-panel border border-border rounded-card p-4 text-xs text-dim mb-5">
-          Modo de exemplo (NEXT_PUBLIC_USE_MOCK=1): curvas sintéticas geradas no navegador, sem chamada à API.
-          Servem só para visualizar a interface.
-        </div>
-      )}
       {carregando && (
         <div className="bg-panel border border-border rounded-card p-5 text-sm text-dim mb-5">Carregando simulação…</div>
       )}

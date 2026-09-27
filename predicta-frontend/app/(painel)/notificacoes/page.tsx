@@ -53,30 +53,50 @@ export default function Notificacoes() {
   const horarios = horariosDeEntrega(horas, prefs);
   const totalAvisos = entregas.reduce((s, e) => s + e.avisos.length, 0);
   const planoHorario = planoQueLibera((id) => LIMITES[id].intervaloMinH === 1);
+  const tiposLiberados = TIPOS.filter((t) => limites.tipos.includes(t.id));
+  const canaisAtivos = CANAIS.filter((c) => prefs.canais.includes(c.id) && limites.canais.includes(c.id));
 
   return (
-    <div className="flex flex-col gap-5 max-w-4xl">
+    <div className="flex flex-col gap-4 max-w-4xl">
       <div className="flex items-end justify-between flex-wrap gap-2">
         <div>
           <p className="text-xs text-dim font-mono mb-1">preferências · plano {plano.nome}</p>
           <h1 className="font-display font-bold text-2xl">Notificações</h1>
           <p className="text-sm text-dim mt-1">Escolha com que frequência, sobre o quê e por onde você quer ser avisado.</p>
         </div>
-        <span className="text-xs font-mono" style={{ color: "var(--accent-good)", opacity: salvo ? 1 : 0, transition: "opacity .3s" }}>
+        <span
+          className="text-xs font-mono"
+          style={{ color: "var(--accent-good)", opacity: salvo ? 1 : 0, transition: "opacity .3s" }}
+        >
           ✓ salvo
         </span>
       </div>
 
-      {/* Frequência */}
-      <section className="bg-panel border border-border rounded-card p-5">
-        <p className="text-xs text-dim font-mono mb-1">Passo 1</p>
-        <h2 className="font-display text-lg mb-1">Frequência</h2>
+      {/* Estado atual em uma linha: o que está valendo agora, sem precisar ler as 4 seções */}
+      <div className="flex flex-wrap gap-2 text-xs">
+        <Chip rotulo="Frequência" valor={labelIntervalo(prefs.intervaloH).replace("a cada ", "").replace("1 vez por dia", "1×/dia")} />
+        <Chip rotulo="Assuntos" valor={`${prefs.tipos.filter((t) => limites.tipos.includes(t)).length} de ${tiposLiberados.length}`} />
+        <Chip rotulo="Canais" valor={canaisAtivos.length ? canaisAtivos.map((c) => c.nome).join(", ") : "nenhum"} />
+        <Chip
+          rotulo="Silêncio"
+          valor={
+            limites.silencio && prefs.silencio.ativo
+              ? `${String(prefs.silencio.inicio).padStart(2, "0")}h–${String(prefs.silencio.fim).padStart(2, "0")}h`
+              : "desligado"
+          }
+        />
+        <Chip rotulo="Hoje" valor={`${totalAvisos} ${totalAvisos === 1 ? "aviso" : "avisos"}`} destaque />
+      </div>
+
+      {/* 1 · frequência */}
+      <section className="bg-panel border border-border rounded-card p-4">
+        <h2 className="font-display text-lg mb-1">1 · Com que frequência</h2>
         <p className="text-sm text-dim mb-4">
           De quanto em quanto tempo os avisos chegam. Seu plano permite a partir de{" "}
           <b className="text-text">{labelIntervalo(limites.intervaloMinH).replace("a cada ", "")}</b>.
         </p>
 
-        <div className="flex gap-2 flex-wrap mb-5">
+        <div className="flex gap-2 flex-wrap mb-4">
           {TODOS_INTERVALOS.map((h) => {
             const liberado = h >= limites.intervaloMinH;
             const ativo = prefs.intervaloH === h;
@@ -104,23 +124,28 @@ export default function Notificacoes() {
           })}
         </div>
 
-        <label className="block text-sm mb-2">
-          Personalizado: <b>{labelIntervalo(prefs.intervaloH)}</b>
-        </label>
-        <input
-          type="range"
-          min={limites.intervaloMinH}
-          max={24}
-          step={1}
-          value={prefs.intervaloH}
-          onChange={(e) => atualizar({ intervaloH: Number(e.target.value) })}
-          className="w-full accent-[var(--accent-brand)]"
-          aria-label="Intervalo entre notificações, em horas"
-        />
-        <div className="flex justify-between text-[11px] text-dim font-mono mt-1">
-          <span>{limites.intervaloMinH}h</span>
-          <span>24h</span>
-        </div>
+        <details className="text-sm">
+          <summary className="text-xs text-dim cursor-pointer hover:text-text">
+            Ajuste fino — hoje: {labelIntervalo(prefs.intervaloH)}
+          </summary>
+          <div className="mt-2">
+            <input
+              type="range"
+              min={limites.intervaloMinH}
+              max={24}
+              step={1}
+              value={prefs.intervaloH}
+              onChange={(e) => atualizar({ intervaloH: Number(e.target.value) })}
+              className="w-full accent-[var(--accent-brand)]"
+              aria-label="Intervalo entre notificações, em horas"
+            />
+            <div className="flex justify-between text-[11px] text-dim font-mono">
+              <span>{limites.intervaloMinH}h</span>
+              <span>24h</span>
+            </div>
+          </div>
+        </details>
+
         {limites.intervaloMinH > 1 && (
           <p className="text-xs text-dim mt-3">
             🔒 Avisos de hora em hora no plano{" "}
@@ -131,27 +156,49 @@ export default function Notificacoes() {
           </p>
         )}
 
-        <div className="border-t border-border mt-5 pt-4">
-          <p className="text-xs text-dim font-mono mb-2">prévia do dia simulado</p>
-          <div className="flex gap-2 flex-wrap mb-2">
-            {horarios.map((h) => (
-              <span key={h} className="border border-border rounded-card px-2.5 py-1 text-xs font-mono">
-                {h}
-              </span>
-            ))}
+        {/* Prévia: o que chega em cada horário, não só a lista de horários */}
+        <div className="border-t border-border mt-4 pt-3">
+          <div className="flex items-baseline justify-between flex-wrap gap-2 mb-2">
+            <p className="text-xs text-dim font-mono">o que você receberia no dia simulado</p>
+            <p className="text-xs text-dim">
+              {horarios.length} {horarios.length === 1 ? "janela de envio" : "janelas de envio"} ·{" "}
+              {entregas.length} com conteúdo
+              {limites.maxPorDia !== Infinity && ` · limite ${limites.maxPorDia} avisos/dia`}
+            </p>
           </div>
-          <p className="text-xs text-dim">
-            {horarios.length} {horarios.length === 1 ? "entrega" : "entregas"} por dia · {totalAvisos}{" "}
-            {totalAvisos === 1 ? "aviso" : "avisos"} hoje com as suas escolhas
-            {limites.maxPorDia !== Infinity && ` (limite do plano: ${limites.maxPorDia}/dia)`}.
-          </p>
+
+          {entregas.length === 0 ? (
+            <p className="text-sm text-dim">
+              Nenhum aviso cairia nas suas escolhas hoje. Ative mais assuntos na seção 2 para ver o efeito.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-1.5">
+              {entregas.map((e) => (
+                <li key={e.slotIdx} className="flex gap-3 border border-border rounded-card px-3 py-2">
+                  <span className="text-xs font-mono text-dim mt-0.5 w-10 flex-shrink-0">{e.horario}</span>
+                  <div className="min-w-0">
+                    {e.avisos.map((a) => (
+                      <p key={a.id} className="text-sm leading-snug">
+                        {a.titulo}
+                      </p>
+                    ))}
+                    {e.adiadaPorSilencio && <p className="text-[11px] text-dim mt-0.5">adiado pelo horário de silêncio</p>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
-      {/* Tipos */}
-      <section className="bg-panel border border-border rounded-card p-5">
-        <p className="text-xs text-dim font-mono mb-1">Passo 2</p>
-        <h2 className="font-display text-lg mb-4">Sobre o que avisar</h2>
+      {/* 2 · assuntos */}
+      <section className="bg-panel border border-border rounded-card p-4">
+        <div className="flex items-baseline justify-between flex-wrap gap-2 mb-3">
+          <h2 className="font-display text-lg">2 · Sobre o que avisar</h2>
+          <span className="text-xs text-dim font-mono">
+            {prefs.tipos.filter((t) => limites.tipos.includes(t)).length} de {tiposLiberados.length} ativos
+          </span>
+        </div>
         <div className="grid sm:grid-cols-2 gap-2">
           {TIPOS.map((t) => {
             const liberado = limites.tipos.includes(t.id);
@@ -170,10 +217,9 @@ export default function Notificacoes() {
         </div>
       </section>
 
-      {/* Canais */}
-      <section className="bg-panel border border-border rounded-card p-5">
-        <p className="text-xs text-dim font-mono mb-1">Passo 3</p>
-        <h2 className="font-display text-lg mb-4">Por onde</h2>
+      {/* 3 · canais */}
+      <section className="bg-panel border border-border rounded-card p-4">
+        <h2 className="font-display text-lg mb-3">3 · Por onde receber</h2>
         <div className="grid sm:grid-cols-2 gap-2">
           {CANAIS.map((c) => {
             const liberado = limites.canais.includes(c.id);
@@ -182,7 +228,13 @@ export default function Notificacoes() {
               <Opcao
                 key={c.id}
                 titulo={c.nome}
-                descricao={liberado ? (c.id === "app" ? "Aparece no sino 🔔 do topo" : "Envio real ainda não integrado (protótipo)") : `Disponível no plano ${libera.nome}`}
+                descricao={
+                  liberado
+                    ? c.id === "app"
+                      ? "Aparece no sino 🔔 do topo"
+                      : "Envio real ainda não integrado (protótipo)"
+                    : `Disponível no plano ${libera.nome}`
+                }
                 marcado={prefs.canais.includes(c.id)}
                 liberado={liberado}
                 onChange={() => alternarCanal(c.id)}
@@ -192,10 +244,9 @@ export default function Notificacoes() {
         </div>
       </section>
 
-      {/* Silêncio */}
-      <section className="bg-panel border border-border rounded-card p-5">
-        <p className="text-xs text-dim font-mono mb-1">Passo 4</p>
-        <h2 className="font-display text-lg mb-1">Horário de silêncio</h2>
+      {/* 4 · silêncio */}
+      <section className="bg-panel border border-border rounded-card p-4">
+        <h2 className="font-display text-lg mb-1">4 · Horário de silêncio</h2>
         {limites.silencio ? (
           <>
             <p className="text-sm text-dim mb-4">Avisos que cairiam nesse horário chegam logo depois que ele acabar.</p>
@@ -210,9 +261,17 @@ export default function Notificacoes() {
                 Ativar
               </label>
               <span className="text-dim">das</span>
-              <HoraSelect valor={prefs.silencio.inicio} desativado={!prefs.silencio.ativo} onChange={(v) => atualizar({ silencio: { ...prefs.silencio, inicio: v } })} />
+              <HoraSelect
+                valor={prefs.silencio.inicio}
+                desativado={!prefs.silencio.ativo}
+                onChange={(v) => atualizar({ silencio: { ...prefs.silencio, inicio: v } })}
+              />
               <span className="text-dim">às</span>
-              <HoraSelect valor={prefs.silencio.fim} desativado={!prefs.silencio.ativo} onChange={(v) => atualizar({ silencio: { ...prefs.silencio, fim: v } })} />
+              <HoraSelect
+                valor={prefs.silencio.fim}
+                desativado={!prefs.silencio.ativo}
+                onChange={(v) => atualizar({ silencio: { ...prefs.silencio, fim: v } })}
+              />
             </div>
           </>
         ) : (
@@ -233,6 +292,15 @@ export default function Notificacoes() {
   );
 }
 
+function Chip({ rotulo, valor, destaque }: { rotulo: string; valor: string; destaque?: boolean }) {
+  return (
+    <span className="border border-border rounded-card px-3 py-1.5">
+      <span className="text-dim">{rotulo}: </span>
+      <b style={destaque ? { color: "var(--accent-good)" } : undefined}>{valor}</b>
+    </span>
+  );
+}
+
 function Opcao({
   titulo,
   descricao,
@@ -248,7 +316,10 @@ function Opcao({
 }) {
   return (
     <label
-      className={`flex items-start gap-3 border border-border rounded-card px-3 py-2.5 ${liberado ? "cursor-pointer hover:border-brand" : "opacity-50 cursor-not-allowed"}`}
+      className={`flex items-start gap-3 border rounded-card px-3 py-2.5 ${
+        liberado ? "cursor-pointer hover:border-brand" : "opacity-50 cursor-not-allowed border-border"
+      }`}
+      style={liberado && marcado ? { borderColor: "var(--accent-brand)" } : { borderColor: "var(--border)" }}
     >
       <input
         type="checkbox"

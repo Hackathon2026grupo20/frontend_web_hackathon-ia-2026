@@ -1,16 +1,17 @@
 import { getCatalogProfiles, runSimulation } from "@/lib/api";
-import { mockSimulation, type PerfilConsumo } from "@/lib/mock";
-import type { RegionPreset } from "@/lib/regions";
-import type { CustomerType, DistributorInfo, SimulationResponse, TariffProfile } from "@/types/api";
-
-// NEXT_PUBLIC_USE_MOCK=1 → dashboard roda sem backend, com dados sintéticos sinalizados na UI.
-export const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "1";
+import type { PerfilConsumo } from "@/lib/perfilConsumo";
+import type {
+  CustomerType,
+  DistributorInfo,
+  SimulationMode,
+  SimulationResponse,
+  TariffProfile,
+} from "@/types/api";
 
 export interface SimulationResult {
   simulation: SimulationResponse;
   profile: TariffProfile | null;
   distributor: DistributorInfo | null;
-  mock: boolean;
 }
 
 // Subgrupo ANEEL de baixa tensão por tipo de cliente: B1 residencial; B3 "demais classes"
@@ -32,35 +33,40 @@ export function escolherPerfilTarifa(profiles: TariffProfile[], tipo: CustomerTy
   );
 }
 
-export async function simularRegiao(
-  preset: RegionPreset,
+// Contrato de energia do cliente: a distribuidora dele e o subsistema onde ela atua. Vem do
+// perfil do usuário (lib/usuario.ts), não de um seletor no painel.
+export interface AlvoSimulacao {
+  cnpj: string; // CNPJ da distribuidora, só dígitos
+  regionId: string; // subsistema ONS
+  mode: SimulationMode;
+  rotulo: string; // nome da distribuidora, usado só na mensagem de erro
+}
+
+export async function simularCliente(
+  alvo: AlvoSimulacao,
   perfil: PerfilConsumo,
   replayKey?: string
 ): Promise<SimulationResult> {
-  if (USE_MOCK) {
-    return { simulation: mockSimulation(preset, perfil), profile: null, distributor: null, mock: true };
-  }
-
-  const catalogo = await getCatalogProfiles(preset.cnpj, preset.id);
+  const catalogo = await getCatalogProfiles(alvo.cnpj, alvo.regionId);
   const perfilTarifa = escolherPerfilTarifa(catalogo.profiles, perfil.customer_type);
   if (!perfilTarifa) {
     throw new Error(
-      `A API não tem perfil tarifário ANEEL vigente para ${preset.distributorLabel} (CNPJ ${preset.cnpj}). ` +
+      `A API não tem perfil tarifário ANEEL vigente para ${alvo.rotulo} (CNPJ ${alvo.cnpj}). ` +
         "As tarifas processadas provavelmente ainda não foram carregadas no backend."
     );
   }
 
   const simulation = await runSimulation({
-    cnpj: preset.cnpj,
-    region: preset.id,
+    cnpj: alvo.cnpj,
+    region: alvo.regionId,
     distributor: perfilTarifa.distributor_id,
     profile: perfilTarifa.id,
     monthly_kwh: perfil.monthly_kwh,
     customer_type: perfil.customer_type,
-    mode: preset.mode,
+    mode: alvo.mode,
     flexible_pct: perfil.flexible_pct,
     // "" = janela mais recente disponível (o backend escolhe)
     replay_key: replayKey || undefined,
   });
-  return { simulation, profile: perfilTarifa, distributor: catalogo.distributor, mock: false };
+  return { simulation, profile: perfilTarifa, distributor: catalogo.distributor };
 }

@@ -21,8 +21,7 @@ export function TariffComparisonChart({
   differencePct: number;
 }) {
   return (
-    <div className="bg-panel border border-border rounded-card p-5">
-      <p className="text-xs text-dim mb-2 font-mono">Passo 6</p>
+    <div className="bg-panel border border-border rounded-card p-4">
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <h2 className="font-display text-lg">Tarifa-base × tarifa dinâmica (24h)</h2>
         <span className={`text-sm font-mono ${differencePct <= 0 ? "text-good" : "text-alert"}`}>
@@ -31,7 +30,7 @@ export function TariffComparisonChart({
         </span>
       </div>
 
-      <ResponsiveContainer width="100%" height={220}>
+      <ResponsiveContainer width="100%" height={170}>
         <LineChart
           data={hourly.map((h) => ({ ...h, hora: horaLocal(h) }))}
           margin={{ top: 5, right: 10, left: -20, bottom: 0 }}

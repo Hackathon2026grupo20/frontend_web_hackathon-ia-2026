@@ -6,8 +6,7 @@ export function TariffPanel({
   dynamicMeanRsKwh: number;
 }) {
   return (
-    <div className="bg-panel border border-border rounded-card p-5">
-      <p className="text-xs text-dim mb-2 font-mono">Passo 3</p>
+    <div className="bg-panel border border-border rounded-card p-4">
       <h2 className="font-display text-lg mb-3">Tarifa (média 24h)</h2>
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div>

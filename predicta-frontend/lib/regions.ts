@@ -10,6 +10,11 @@ import type { SimulationMode } from "@/types/api";
 // têm 24h operacionais publicadas em system_signal_v1 (mesmo no backend local) — simulation_available
 // fica false pra essas regiões, então os CNPJs abaixo são placeholders não confirmados e
 // catalog/profiles/ pode devolver profiles:[] vazio. Ajustar quando o backend publicar dados.
+//
+// `label` é só o nome do subsistema — em /verificacao a distribuidora é escolhida à parte
+// (lib/distribuidoras.ts, as 103 do catálogo ANEEL), então fixar um nome de distribuidora aqui
+// ficaria errado assim que o usuário trocasse a seleção. `distributorLabel` continua existindo
+// só como rótulo provisório em telas que ainda não têm a distribuidora resolvida pela API.
 export interface RegionPreset {
   id: string;
   label: string;
@@ -23,21 +28,21 @@ const DEFAULTS = { mode: "replay" } as const;
 export const REGIONS_DEMO: RegionPreset[] = [
   {
     id: "SE/CO",
-    label: "Sudeste/Centro-Oeste (Enel RJ — Rio de Janeiro)",
+    label: "Sudeste/Centro-Oeste",
     cnpj: "33050071000158",
     distributorLabel: "Enel RJ",
     ...DEFAULTS,
   },
   {
     id: "NE",
-    label: "Nordeste (Enel CE — Fortaleza)",
+    label: "Nordeste",
     cnpj: "07047251000170",
     distributorLabel: "Enel CE",
     ...DEFAULTS,
   },
   {
     id: "S",
-    label: "Sul (CELESC)",
+    label: "Sul",
     cnpj: "08336783000190",
     distributorLabel: "CELESC",
     ...DEFAULTS,

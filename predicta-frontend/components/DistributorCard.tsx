@@ -1,36 +1,45 @@
-import type { RegionPreset } from "@/lib/regions";
 import type { DistributorInfo, TariffProfile } from "@/types/api";
 
+// Distribuidora e regime tarifário do contrato. Tudo aqui vem da API
+// (GET /catalog/profiles/ pelo CNPJ do cliente) — nada é escolhido no painel.
 export function DistributorCard({
-  preset,
   distributor,
   profile,
+  cnpj,
+  regiaoLabel,
 }: {
-  preset: RegionPreset;
   distributor: DistributorInfo | null;
   profile: TariffProfile | null;
+  cnpj: string;
+  regiaoLabel: string;
 }) {
-  // Nome e CNPJ vêm do catálogo da API quando disponível; o preset é só fallback.
-  const nome = distributor?.sigla ?? preset.distributorLabel;
-  const cnpj = distributor?.cnpj ?? preset.cnpj;
   return (
-    <div className="bg-panel border border-border rounded-card p-5">
-      <p className="text-xs text-dim mb-2 font-mono">Passo 2</p>
-      <h2 className="font-display text-lg mb-3">Distribuidora</h2>
-      <div className="flex items-baseline justify-between mb-1">
-        <span className="font-display text-2xl">{nome}</span>
-      </div>
-      {distributor?.razao_social && <p className="text-xs text-dim">{distributor.razao_social}</p>}
-      <p className="text-xs text-dim mt-1 font-mono">{cnpj}</p>
-      <p className="text-xs text-dim mt-3">
-        Região: <span className="font-medium text-text">{preset.label}</span>
+    <div className="bg-panel border border-border rounded-card p-4">
+      <p className="text-xs text-dim font-mono mb-1">Distribuidora</p>
+      <h2 className="font-display text-xl leading-tight">{distributor?.sigla ?? "—"}</h2>
+      {distributor?.razao_social && <p className="text-xs text-dim mt-0.5">{distributor.razao_social}</p>}
+      <p className="text-xs text-dim mt-1 font-mono">{distributor?.cnpj ?? cnpj}</p>
+      <p className="text-xs text-dim mt-2">
+        Subsistema: <span className="font-medium text-text">{regiaoLabel}</span>
+        {distributor?.uf && <span className="text-dim"> · {distributor.uf}</span>}
       </p>
-      {profile && (
-        <p className="text-xs text-dim mt-1">
-          Perfil ANEEL: <span className="font-medium text-text">{profile.label}</span>
-          {profile.subgroup && ` · ${profile.subgroup}`}
-        </p>
-      )}
+
+      <div className="mt-3 pt-3 border-t border-border">
+        <p className="text-xs text-dim font-mono mb-1">Regime tarifário</p>
+        {profile ? (
+          <>
+            <p className="text-sm font-medium leading-snug">{profile.label}</p>
+            <p className="text-xs text-dim mt-1">
+              {profile.subgroup} · {profile.modality}
+            </p>
+            <p className="text-xs text-dim mt-1">
+              Tarifa-base <span className="font-mono text-text">R$ {profile.base_total_rs_kwh.toFixed(5)}</span>/kWh
+            </p>
+          </>
+        ) : (
+          <p className="text-xs text-dim">Sem perfil tarifário vigente para este CNPJ.</p>
+        )}
+      </div>
     </div>
   );
 }

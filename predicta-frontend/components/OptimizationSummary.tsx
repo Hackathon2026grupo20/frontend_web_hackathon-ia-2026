@@ -5,8 +5,7 @@ import type { SimulationOptimization } from "@/types/api";
 // como economia real; o difference_pct do topo NÃO é essa economia, é a neutralidade tarifária.
 export function OptimizationSummary({ optimization }: { optimization: SimulationOptimization }) {
   return (
-    <div className="bg-panel border border-border rounded-card p-5">
-      <p className="text-xs text-dim mb-2 font-mono">Passo 8</p>
+    <div className="bg-panel border border-border rounded-card p-4">
       <h2 className="font-display font-bold text-lg mb-3">Economia com deslocamento de carga</h2>
 
       <div className="grid sm:grid-cols-3 gap-3 mb-3">
