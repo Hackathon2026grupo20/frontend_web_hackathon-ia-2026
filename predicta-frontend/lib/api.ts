@@ -19,6 +19,26 @@ export class ApiError extends Error {
   }
 }
 
+// TTL curto pra evitar martelar o backend (Render free tier dorme e demora ~50-60s pra acordar)
+// com requests repetidas/idênticas disparadas por re-render, StrictMode ou navegação entre as
+// páginas do painel (dashboard/economia/carga/recomendações podem pedir a mesma simulação).
+// Não é cache de dado "pra sempre" — só absorve rajadas de chamadas iguais numa janela curta.
+const CACHE_TTL_MS = 20_000;
+const cache = new Map<string, { expiresAt: number; promise: Promise<unknown> }>();
+
+function withCache<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  const now = Date.now();
+  const hit = cache.get(key);
+  if (hit && hit.expiresAt > now) return hit.promise as Promise<T>;
+
+  const promise = fetcher().catch((e) => {
+    cache.delete(key); // erro não deve "grudar" no cache até o TTL expirar
+    throw e;
+  });
+  cache.set(key, { expiresAt: now + CACHE_TTL_MS, promise });
+  return promise;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
@@ -43,20 +63,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export function getSimulationOptions(region: string) {
-  return request<SimulationOptionsResponse>(
-    `/api/v1/simulations/options/?region=${encodeURIComponent(region)}`
-  );
+  const path = `/api/v1/simulations/options/?region=${encodeURIComponent(region)}`;
+  return withCache(`GET ${path}`, () => request<SimulationOptionsResponse>(path));
 }
 
 export function getCatalogProfiles(cnpj: string, region: string) {
-  return request<CatalogProfilesResponse>(
-    `/api/v1/catalog/profiles/?cnpj=${encodeURIComponent(cnpj)}&region=${encodeURIComponent(region)}`
-  );
+  const path = `/api/v1/catalog/profiles/?cnpj=${encodeURIComponent(cnpj)}&region=${encodeURIComponent(region)}`;
+  return withCache(`GET ${path}`, () => request<CatalogProfilesResponse>(path));
 }
 
 export function runSimulation(payload: SimulationRequest) {
-  return request<SimulationResponse>(`/api/v1/simulations/`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  // Determinístico pro mesmo payload (mesma região/perfil/consumo/flexible_pct/replay_key) —
+  // cachear é seguro; qualquer edição do cliente (carga, plano) muda o payload e gera nova chave.
+  return withCache(`POST /simulations ${JSON.stringify(payload)}`, () =>
+    request<SimulationResponse>(`/api/v1/simulations/`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    })
+  );
 }
