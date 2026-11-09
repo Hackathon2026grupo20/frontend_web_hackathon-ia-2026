@@ -175,8 +175,8 @@ export default function Verificacao() {
             <p className="text-xs text-dim font-mono mb-1">painel interativo · dados crus da API</p>
             <h1 className="font-display font-extrabold text-2xl">Verificação</h1>
           </div>
-          <Link href="/dashboard" className="text-sm text-dim hover:text-text transition-colors">
-            ← dashboard
+          <Link href="/" className="text-sm text-dim hover:text-text transition-colors">
+            ← início
           </Link>
         </header>
 

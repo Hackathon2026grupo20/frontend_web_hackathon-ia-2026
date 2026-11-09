@@ -59,10 +59,19 @@
   --font-mono: "IBM Plex Mono", monospace;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
+}
+
+/* Compensa o header fixo da landing ao rolar para uma âncora do menu */
+[data-theme="landing"] section[id] {
+  scroll-margin-top: 4.5rem;
 }
 
 /* Glow: reservado pra número/linha que representa o dado em si — não decoração espalhada */
