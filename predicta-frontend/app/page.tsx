@@ -164,7 +164,8 @@ export default function Landing() {
       </section>
 
       {/* Produto */}
-      <section id="produto" data-theme="operacao" className="relative bg-bg">
+      {/* text-text aqui é obrigatório: a cor herdada do topo já vem calculada no tema claro */}
+      <section id="produto" data-theme="operacao" className="relative bg-bg text-text">
         <Reveal className="max-w-4xl mx-auto px-4 md:px-8 py-20 md:py-28">
           <p className="text-xs font-mono text-dim mb-2 text-center">Produto</p>
           <h2 className="font-display font-bold text-2xl md:text-3xl mb-10 text-center tracking-tight">
