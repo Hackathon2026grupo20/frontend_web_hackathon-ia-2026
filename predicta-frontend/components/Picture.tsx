@@ -27,7 +27,7 @@ export function Picture({
   height,
   sizes,
   gradientClassName = "bg-gradient-to-br from-[#0a0f1c] via-[#141b2e] to-[#1a2138]",
-  patternColor = "#ff9640",
+  patternColor = "#8b8df7",
 }: PictureProps) {
   if (imageExists(src)) {
     if (fill) {

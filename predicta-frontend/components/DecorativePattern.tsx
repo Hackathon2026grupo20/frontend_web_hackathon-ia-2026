@@ -1,6 +1,6 @@
 // Padrão decorativo em linhas, usado só dentro dos placeholders de imagem (gradiente + SVG)
 // quando o arquivo real em public/images/ ainda não existe.
-export function DecorativePattern({ color = "#ff9640", opacity = 0.35 }: { color?: string; opacity?: number }) {
+export function DecorativePattern({ color = "#8b8df7", opacity = 0.35 }: { color?: string; opacity?: number }) {
   return (
     <svg
       viewBox="0 0 200 120"

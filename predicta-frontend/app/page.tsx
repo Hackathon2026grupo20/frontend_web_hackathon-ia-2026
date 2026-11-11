@@ -32,7 +32,7 @@ const DIFERENCIAIS = [
   {
     t: "Incerteza sempre visível",
     d: "Quando a previsão é aproximada, isso aparece na tela — nunca fingimos uma precisão que não existe.",
-    img: "eolica.jpg",
+    img: "cidade-noite.jpg",
     Icon: PressureIcon,
   },
   {
@@ -95,8 +95,8 @@ export default function Landing() {
       {/* Hero */}
       <section data-theme="operacao" className="relative min-h-[80vh] flex items-center overflow-hidden">
         <Picture
-          src="hero.jpg"
-          alt="Linhas de transmissão de energia ao entardecer"
+          src="eolica.jpg"
+          alt="Parque eólico sob céu azul"
           fill
           priority
           className="object-cover"
@@ -280,7 +280,7 @@ export default function Landing() {
                     className="rounded-card w-full h-24 mb-4 flex items-center justify-center bg-gradient-to-br from-[#0a0f1c] to-[#1a2138]"
                     aria-hidden="true"
                   >
-                    <item.Icon className="h-9 w-9" style={{ color: "#ff9640" }} />
+                    <item.Icon className="h-9 w-9" style={{ color: "#8b8df7" }} />
                   </div>
                 )}
                 <h3 className="font-display font-bold mb-1.5">{item.t}</h3>

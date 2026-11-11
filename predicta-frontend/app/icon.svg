@@ -3,10 +3,10 @@
   <path
     d="M7 27 C 12 27, 14 15, 19 15 C 23 15, 22 22, 27 22 C 31 22, 31 11, 34 9"
     fill="none"
-    stroke="#ff9640"
+    stroke="#8b8df7"
     stroke-width="3"
     stroke-linecap="round"
     stroke-linejoin="round"
   />
-  <circle cx="34" cy="9" r="2.2" fill="#ff9640" />
+  <circle cx="34" cy="9" r="2.2" fill="#8b8df7" />
 </svg>
