@@ -5,9 +5,16 @@ const TITLE = "Predicta — Inteligência de demanda para o setor elétrico";
 const DESCRIPTION =
   "A Predicta prevê a pressão de demanda elétrica das próximas 24 horas, cruzando dados do ONS, clima e calendário, e simula uma tarifa dinâmica experimental que indica os melhores horários pra consumir ou deslocar carga.";
 
-// TODO [PREENCHER]: quando o domínio de produção estiver definido, configurar metadataBase
-// (ex.: NEXT_PUBLIC_SITE_URL) para que og:image resolva como URL absoluta nos crawlers sociais.
+// Base absoluta para og:image/twitter:image. Prioridade: NEXT_PUBLIC_SITE_URL (domínio
+// próprio, quando houver) → domínio de produção injetado pela Vercel → localhost em dev.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
