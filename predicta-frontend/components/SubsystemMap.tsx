@@ -70,12 +70,12 @@ export function SubsystemMap() {
       <div className="border border-white/10 rounded-card p-5 bg-white/5 min-h-[120px]">
         {ativo ? (
           <>
-            <p className="text-xs font-mono text-white/40 mb-1">{ativo.id}</p>
+            <p className="text-xs font-mono text-white/55 mb-1">{ativo.id}</p>
             <h3 className="font-display font-bold text-white mb-1.5">{ativo.label}</h3>
-            <p className="text-sm text-white/70 leading-relaxed">{ativo.descricao}</p>
+            <p className="text-base text-white/85 leading-relaxed">{ativo.descricao}</p>
           </>
         ) : (
-          <p className="text-sm text-white/50">Passe o mouse ou toque em uma região do mapa pra ver o subsistema.</p>
+          <p className="text-base text-white/65">Passe o mouse ou toque em uma região do mapa pra ver o subsistema.</p>
         )}
       </div>
     </div>

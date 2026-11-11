@@ -22,7 +22,7 @@ export default function ProductShowcase() {
             className={`px-3.5 py-1.5 rounded-card text-sm font-medium border transition-colors ${
               s.id === subId
                 ? "text-white border-transparent"
-                : "border-white/15 text-white/60 hover:text-white hover:border-white/30"
+                : "border-white/20 text-white/75 hover:text-white hover:border-white/40"
             }`}
             style={s.id === subId ? { background: "var(--accent-brand)" } : undefined}
           >
@@ -32,13 +32,13 @@ export default function ProductShowcase() {
       </div>
 
       <BrowserFrame>
-        <p className="text-sm text-white/70 mb-2">
-          Pressão de demanda prevista — {sub.label}, próximas 24h <span className="text-white/40">(dados sintéticos)</span>
+        <p className="text-sm text-white/85 mb-2">
+          Pressão de demanda prevista — {sub.label}, próximas 24h <span className="text-white/60">(dados sintéticos)</span>
         </p>
         <ForecastBandChart data={sub.hourly} />
       </BrowserFrame>
 
-      <p className="text-xs text-white/40 mt-4 text-center">Visualização ilustrativa · dados sintéticos</p>
+      <p className="text-sm text-white/60 mt-4 text-center">Visualização ilustrativa · dados sintéticos</p>
     </div>
   );
 }

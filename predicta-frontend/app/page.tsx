@@ -172,10 +172,10 @@ export default function Landing() {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-6 mb-12">
-            <div className="border border-border rounded-card p-6 transition-transform hover:-translate-y-1">
+            <div className="bg-panel2 border border-border rounded-card p-6 transition-transform hover:-translate-y-1">
               <ForecastIcon className="h-7 w-7 mb-3" style={{ color: "var(--accent-brand)" }} />
               <h3 className="font-display font-bold text-lg mb-2">Previsão de pressão de demanda</h3>
-              <p className="text-sm text-dim leading-relaxed mb-3">
+              <p className="text-base text-dim leading-relaxed mb-3">
                 Para as próximas 24 horas, por subsistema elétrico (SE/CO, S, NE, N), com faixa de
                 incerteza — p10, p50 e p90 — em vez de um número solto.
               </p>
@@ -187,7 +187,7 @@ export default function Landing() {
                   Saiba mais
                   <span className="transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
                 </summary>
-                <p className="text-sm text-dim leading-relaxed mt-2">
+                <p className="text-base text-dim leading-relaxed mt-2">
                   A previsão cruza histórico de carga do ONS, variáveis climáticas e calendário. Em vez
                   de um valor único, mostramos uma faixa — do cenário mais conservador (p10) ao mais
                   extremo (p90) — pra deixar a incerteza visível, não escondida.
@@ -195,7 +195,7 @@ export default function Landing() {
               </details>
             </div>
 
-            <div className="border border-border rounded-card p-6 transition-transform hover:-translate-y-1">
+            <div className="bg-panel2 border border-border rounded-card p-6 transition-transform hover:-translate-y-1">
               <TariffIcon className="h-7 w-7 mb-3" style={{ color: "var(--accent-demand)" }} />
               <h3 className="font-display font-bold text-lg mb-2">Tarifa dinâmica experimental</h3>
               <span
@@ -204,7 +204,7 @@ export default function Landing() {
               >
                 Experimental · não homologada pela ANEEL
               </span>
-              <p className="text-sm text-dim leading-relaxed mb-3">
+              <p className="text-base text-dim leading-relaxed mb-3">
                 Simula, sobre a tarifa-base homologada (TE + TUSD), um sinal de preço que varia com a
                 pressão prevista do sistema.
               </p>
@@ -216,7 +216,7 @@ export default function Landing() {
                   Saiba mais
                   <span className="transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
                 </summary>
-                <p className="text-sm text-dim leading-relaxed mt-2">
+                <p className="text-base text-dim leading-relaxed mt-2">
                   Opera com guardrails: piso e teto em torno da tarifa-base, rampa de variação limitada
                   entre horas, neutralidade esperada no total do dia e fallback automático pra
                   tarifa-base quando um dado não está disponível.

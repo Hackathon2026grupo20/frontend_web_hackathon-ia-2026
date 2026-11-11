@@ -10,9 +10,9 @@ export function ForecastBandChart({ data }: { data: ForecastHourPoint[] }) {
     <ResponsiveContainer width="100%" height={240}>
       <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-        <XAxis dataKey="hora" tick={{ fontSize: 11, fill: "rgba(255,255,255,0.5)" }} interval={2} />
+        <XAxis dataKey="hora" tick={{ fontSize: 11, fill: "rgba(255,255,255,0.7)" }} interval={2} />
         <YAxis
-          tick={{ fontSize: 11, fill: "rgba(255,255,255,0.5)" }}
+          tick={{ fontSize: 11, fill: "rgba(255,255,255,0.7)" }}
           domain={[0, 1]}
           tickFormatter={(v) => `${Math.round(v * 100)}%`}
         />
