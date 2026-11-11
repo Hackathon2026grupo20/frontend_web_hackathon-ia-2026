@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
+import { CONTACT_EMAIL, hasContactEmail } from "@/lib/config";
+import { BrandMark } from "@/components/BrandMark";
 
 export const metadata: Metadata = {
   title: "Privacidade — Predicta",
@@ -12,7 +14,8 @@ export default function Privacidade() {
     <div data-theme="landing" className="min-h-screen bg-bg text-text font-body flex flex-col">
       <header className="border-b border-border">
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-4">
-          <Link href="/" className="font-display font-extrabold text-xl">
+          <Link href="/" className="flex items-center gap-2 font-display font-extrabold text-xl">
+            <BrandMark className="h-7 w-7 rounded-[8px]" />
             Predicta
           </Link>
         </div>
@@ -51,10 +54,14 @@ export default function Privacidade() {
 
           <section>
             <h2 className="font-display font-bold text-lg text-text mb-2">Contato sobre privacidade</h2>
-            <p>[PREENCHER: canal de contato para dúvidas ou solicitações sobre privacidade.]</p>
+            <p>
+              {hasContactEmail
+                ? `Dúvidas ou solicitações sobre privacidade podem ser enviadas para ${CONTACT_EMAIL}.`
+                : "O canal de contato para dúvidas ou solicitações sobre privacidade será divulgado em breve, junto com o canal de contato geral."}
+            </p>
           </section>
 
-          <p className="text-sm">[PREENCHER: data da última atualização desta política.]</p>
+          <p className="text-sm">Última atualização desta política: 10 de novembro de 2026.</p>
         </div>
       </main>
 

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
+import { CONTACT_EMAIL, hasContactEmail } from "@/lib/config";
 
 const COL_PRODUTO = [
   { href: "/#produto", label: "Produto" },
@@ -9,20 +11,23 @@ const COL_PRODUTO = [
 
 export function SiteFooter() {
   return (
-    <footer className="text-sm text-dim border-t border-border">
-      <div className="max-w-5xl mx-auto px-4 md:px-8 py-10 grid md:grid-cols-[2fr_1fr_1fr] gap-8">
+    <footer data-theme="operacao" className="text-sm text-white/60 bg-bg">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-16 grid md:grid-cols-[2fr_1fr_1fr_1fr] gap-10">
         <div>
-          <p className="font-display font-extrabold text-xl text-text mb-2">Predicta</p>
-          <p className="text-sm text-dim max-w-xs">Inteligência de demanda para o setor elétrico.</p>
+          <div className="flex items-center gap-2 mb-3">
+            <BrandMark className="h-8 w-8 rounded-[9px]" />
+            <span className="font-display font-extrabold text-xl text-white">Predicta</span>
+          </div>
+          <p className="text-sm text-white/50 max-w-xs">Inteligência de demanda para o setor elétrico.</p>
           {/* Redes sociais: [PREENCHER] */}
         </div>
 
         <div>
-          <p className="text-xs font-mono text-dim mb-3">Produto</p>
+          <p className="text-xs font-mono text-white/40 mb-3">Produto</p>
           <ul className="flex flex-col gap-2">
             {COL_PRODUTO.map((l) => (
               <li key={l.href}>
-                <a href={l.href} className="hover:text-text transition-colors">
+                <a href={l.href} className="hover:text-white transition-colors">
                   {l.label}
                 </a>
               </li>
@@ -31,20 +36,34 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <p className="text-xs font-mono text-dim mb-3">Institucional</p>
+          <p className="text-xs font-mono text-white/40 mb-3">Institucional</p>
           <ul className="flex flex-col gap-2">
             <li>
-              <Link href="/privacidade" className="hover:text-text transition-colors">
+              {hasContactEmail ? (
+                <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-white transition-colors">
+                  {CONTACT_EMAIL}
+                </a>
+              ) : (
+                "Contato: em breve"
+              )}
+            </li>
+            <li>Fontes de dados: ONS · Copernicus ERA5-Land · ANEEL</li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="text-xs font-mono text-white/40 mb-3">Legal</p>
+          <ul className="flex flex-col gap-2">
+            <li>
+              <Link href="/privacidade" className="hover:text-white transition-colors">
                 Privacidade
               </Link>
             </li>
-            <li>Contato: em breve</li>
           </ul>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 border-t border-border flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs">
-        <p>Fontes de dados: ONS · Copernicus ERA5-Land · ANEEL</p>
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 border-t border-white/10 text-xs">
         <p>© 2026 Predicta</p>
       </div>
     </footer>
