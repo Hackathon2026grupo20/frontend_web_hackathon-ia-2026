@@ -3,14 +3,24 @@
 import { useState } from "react";
 
 const LINKS = [
-  { href: "#problema", label: "Problema" },
+  { href: "#produto", label: "Produto" },
   { href: "#como-funciona", label: "Como funciona" },
-  { href: "#na-pratica", label: "Veja na prática" },
-  { href: "#reconhecimento", label: "Reconhecimento" },
-  { href: "#proximos-passos", label: "Próximos passos" },
-  { href: "#equipe", label: "Equipe" },
-  { href: "#contato", label: "Contato" },
+  { href: "#diferenciais", label: "Diferenciais" },
+  { href: "#faq", label: "FAQ" },
 ];
+
+function ContatoButton({ className }: { className?: string }) {
+  return (
+    <button
+      type="button"
+      disabled
+      aria-disabled="true"
+      className={`rounded-card border border-border px-4 py-2 text-sm font-medium text-dim opacity-70 cursor-not-allowed ${className ?? ""}`}
+    >
+      Contato · em breve
+    </button>
+  );
+}
 
 export function LandingNav() {
   const [aberto, setAberto] = useState(false);
@@ -29,6 +39,10 @@ export function LandingNav() {
             </a>
           ))}
         </nav>
+
+        <div className="hidden md:block">
+          <ContatoButton />
+        </div>
 
         <button
           type="button"
@@ -53,6 +67,7 @@ export function LandingNav() {
               {l.label}
             </a>
           ))}
+          <ContatoButton className="mt-2 w-full" />
         </nav>
       )}
     </header>

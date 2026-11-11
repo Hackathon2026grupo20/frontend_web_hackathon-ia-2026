@@ -35,7 +35,7 @@ export default function DemoNaPratica() {
       </div>
 
       <p className="text-xs text-dim mt-4">
-        Simulação ilustrativa com dados de exemplo. A curva de consumo é sintética.
+        Visualização ilustrativa · dados sintéticos. A curva de consumo é sintética, não uma previsão ao vivo.
       </p>
     </div>
   );
