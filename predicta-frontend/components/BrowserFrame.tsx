@@ -2,7 +2,7 @@
 export function BrowserFrame({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="rounded-xl border border-white/10 bg-[#0e1526] shadow-2xl -rotate-1 md:-rotate-2"
+      className="rounded-xl border border-white/10 bg-[#0e1526] shadow-2xl"
       style={{ boxShadow: "0 20px 60px -20px rgba(0,0,0,0.6), 0 0 40px -10px var(--accent-brand-glow)" }}
     >
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10">

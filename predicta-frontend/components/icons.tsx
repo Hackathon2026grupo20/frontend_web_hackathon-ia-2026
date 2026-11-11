@@ -68,6 +68,29 @@ export function PressureIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+// Medidor de energia com conferência — ilustra "Método transparente" enquanto não há foto.
+export function MeterCheckIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <rect x="4" y="5" width="20" height="18" rx="2.5" />
+      <path d="M8 13 A6 6 0 0 1 20 13" />
+      <path d="M14 13 L17.5 9.5" />
+      <path d="M9 19 L12 22 L19 15" />
+    </Base>
+  );
+}
+
+// Pino de localização sobre uma malha — ilustra "Confiança de localização".
+export function LocationIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M14 25 C14 25 6 17 6 11 A8 8 0 0 1 22 11 C22 17 14 25 14 25 Z" />
+      <circle cx="14" cy="11" r="2.8" />
+      <path d="M3 24 H25" opacity={0.4} />
+    </Base>
+  );
+}
+
 export function DecisionIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

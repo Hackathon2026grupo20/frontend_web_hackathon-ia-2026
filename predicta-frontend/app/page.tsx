@@ -5,32 +5,53 @@ import { Picture } from "@/components/Picture";
 import { Reveal } from "@/components/Reveal";
 import { WaveDivider } from "@/components/WaveDivider";
 import { SubsystemMap } from "@/components/SubsystemMap";
-import { ForecastIcon, TariffIcon, PublicDataIcon, ModelIcon, PressureIcon, DecisionIcon } from "@/components/icons";
+import {
+  ForecastIcon,
+  TariffIcon,
+  PublicDataIcon,
+  ModelIcon,
+  PressureIcon,
+  DecisionIcon,
+  MeterCheckIcon,
+  LocationIcon,
+} from "@/components/icons";
 import { CONTACT_EMAIL, hasContactEmail } from "@/lib/config";
+import { imageExists } from "@/lib/images";
 
+// Cada card tem uma foto (quando o arquivo existe em public/images/) ou uma ilustração em linha,
+// pra nenhum card parecer que está sem imagem.
+// [PREENCHER foto]: metodo.jpg — ideia: eletricista conferindo o medidor/quadro de luz (licença livre).
+// [PREENCHER foto]: localizacao.jpg — opcional; a ilustração cobre enquanto não houver foto.
 const DIFERENCIAIS = [
   {
     t: "Dado real e público",
     d: "Carga, geração, clima e tarifa vêm de fontes públicas oficiais, nunca de estimativa genérica.",
     img: "transmissao.jpg",
+    Icon: PublicDataIcon,
   },
   {
     t: "Incerteza sempre visível",
     d: "Quando a previsão é aproximada, isso aparece na tela — nunca fingimos uma precisão que não existe.",
     img: "eolica.jpg",
+    Icon: PressureIcon,
   },
   {
     t: "Método transparente",
     d: "Previsão e tarifa são camadas separadas e auditáveis, não uma caixa-preta.",
+    img: "metodo.jpg",
+    Icon: MeterCheckIcon,
   },
   {
     t: "Guardrails na tarifa",
     d: "A tarifa dinâmica experimental opera com piso, teto, rampa e neutralidade controlados, com fallback pra tarifa-base.",
     img: "solar.jpg",
+    Icon: TariffIcon,
   },
   {
     t: "Confiança de localização",
     d: "Cada previsão respeita o subsistema elétrico e a distribuidora da unidade avaliada.",
+    img: "localizacao.jpg",
+    Icon: LocationIcon,
   },
 ];
 
@@ -246,7 +267,7 @@ export default function Landing() {
                 key={item.t}
                 className="bg-bg border border-border rounded-card p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-1"
               >
-                {item.img && (
+                {imageExists(item.img) ? (
                   <Picture
                     src={item.img}
                     alt=""
@@ -254,6 +275,13 @@ export default function Landing() {
                     height={120}
                     className="rounded-card w-full h-24 object-cover mb-4"
                   />
+                ) : (
+                  <div
+                    className="rounded-card w-full h-24 mb-4 flex items-center justify-center bg-gradient-to-br from-[#0a0f1c] to-[#1a2138]"
+                    aria-hidden="true"
+                  >
+                    <item.Icon className="h-9 w-9" style={{ color: "#ff9640" }} />
+                  </div>
                 )}
                 <h3 className="font-display font-bold mb-1.5">{item.t}</h3>
                 <p className="text-sm text-dim leading-relaxed">{item.d}</p>
