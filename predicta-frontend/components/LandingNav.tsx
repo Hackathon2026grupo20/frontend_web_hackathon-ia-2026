@@ -59,7 +59,7 @@ export function LandingNav() {
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-2 font-display font-extrabold text-xl">
           <BrandMark className="h-8 w-8 rounded-[9px]" />
-          <span className={light ? "text-white" : "text-text"}>Predicta</span>
+          <span className={light ? "text-white" : "text-text"}>Predicta Energy</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-6" aria-label="Seções da página">

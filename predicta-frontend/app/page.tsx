@@ -66,7 +66,7 @@ const FAQ_CONTATO_RESPOSTA = hasContactEmail ? `Escreva para ${CONTACT_EMAIL}.` 
 
 const FAQ = [
   {
-    q: "O que a Predicta faz?",
+    q: "O que a Predicta Energy faz?",
     a: "Prevê a pressão de demanda elétrica das próximas 24 horas e simula uma tarifa dinâmica experimental que indica os horários mais e menos vantajosos pra consumir ou deslocar carga.",
   },
   {
@@ -78,7 +78,7 @@ const FAQ = [
     a: "Não. É uma simulação experimental construída sobre a tarifa-base (TE + TUSD) homologada pela ANEEL.",
   },
   {
-    q: "A Predicta promete economia?",
+    q: "A Predicta Energy promete economia?",
     a: "Não. A tarifa dinâmica é experimental e os dados de demonstração são ilustrativos — não há garantia de resultado financeiro.",
   },
   {
@@ -113,7 +113,7 @@ export default function Landing() {
             <span style={{ color: "var(--accent-good)" }}>deslocar</span> ou reduzir carga
           </h1>
           <p className="text-white/80 text-lg md:text-xl mb-9 max-w-xl mx-auto leading-relaxed">
-            A Predicta cruza histórico elétrico, clima e contexto territorial pra prever a pressão do
+            A Predicta Energy cruza histórico elétrico, clima e contexto territorial pra prever a pressão do
             sistema nas próximas 24 horas — e traduz isso em decisão prática pro seu negócio.
           </p>
           <div className="flex items-center justify-center gap-6 flex-wrap">
@@ -260,7 +260,7 @@ export default function Landing() {
         <Reveal className="max-w-5xl mx-auto px-4 md:px-8 py-20 md:py-28">
           <p className="text-xs font-mono text-dim mb-2 text-center">Diferenciais</p>
           <h2 className="font-display font-bold text-2xl md:text-3xl mb-12 text-center tracking-tight">
-            O que separa a Predicta de um número solto
+            O que separa a Predicta Energy de um número solto
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {DIFERENCIAIS.map((item) => (

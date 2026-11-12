@@ -5,8 +5,8 @@ import { CONTACT_EMAIL, hasContactEmail } from "@/lib/config";
 import { BrandMark } from "@/components/BrandMark";
 
 export const metadata: Metadata = {
-  title: "Privacidade — Predicta",
-  description: "Como a Predicta trata dados ao navegar pelo site.",
+  title: "Privacidade — Predicta Energy",
+  description: "Como a Predicta Energy trata dados ao navegar pelo site.",
 };
 
 export default function Privacidade() {
@@ -16,7 +16,7 @@ export default function Privacidade() {
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-4">
           <Link href="/" className="flex items-center gap-2 font-display font-extrabold text-xl">
             <BrandMark className="h-7 w-7 rounded-[8px]" />
-            Predicta
+            Predicta Energy
           </Link>
         </div>
       </header>
@@ -26,7 +26,7 @@ export default function Privacidade() {
 
         <div className="flex flex-col gap-6 text-dim leading-relaxed">
           <p>
-            A Predicta é um produto em desenvolvimento. Esta página resume, de forma simples, como
+            A Predicta Energy é um produto em desenvolvimento. Esta página resume, de forma simples, como
             tratamos dados ao navegar por este site.
           </p>
 
@@ -42,7 +42,7 @@ export default function Privacidade() {
           <section>
             <h2 className="font-display font-bold text-lg text-text mb-2">Dados usados pelo produto</h2>
             <p>
-              Os dados técnicos usados pela Predicta para gerar previsões — ONS, Copernicus ERA5-Land e
+              Os dados técnicos usados pela Predicta Energy para gerar previsões — ONS, Copernicus ERA5-Land e
               ANEEL — são públicos e não identificam pessoas.
             </p>
           </section>

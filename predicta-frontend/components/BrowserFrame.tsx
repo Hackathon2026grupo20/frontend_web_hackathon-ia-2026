@@ -10,7 +10,7 @@ export function BrowserFrame({ children }: { children: React.ReactNode }) {
         <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
         <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
         <span className="ml-3 text-[11px] font-mono text-white/40 bg-white/5 rounded-card px-2.5 py-1">
-          app.predicta
+          predictaenergy.online
         </span>
       </div>
       <div className="p-4 md:p-6">{children}</div>

@@ -16,7 +16,7 @@ export function SiteFooter() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <BrandMark className="h-8 w-8 rounded-[9px]" />
-            <span className="font-display font-extrabold text-xl text-white">Predicta</span>
+            <span className="font-display font-extrabold text-xl text-white">Predicta Energy</span>
           </div>
           <p className="text-sm text-white/50 max-w-xs">Inteligência de demanda para o setor elétrico.</p>
           {/* Redes sociais: [PREENCHER] */}
@@ -64,7 +64,7 @@ export function SiteFooter() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 border-t border-white/10 text-xs">
-        <p>© 2026 Predicta</p>
+        <p>© 2026 Predicta Energy</p>
       </div>
     </footer>
   );

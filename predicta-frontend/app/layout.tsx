@@ -1,9 +1,9 @@
 import "./globals.css";
 import type { Metadata } from "next";
 
-const TITLE = "Predicta — Inteligência de demanda para o setor elétrico";
+const TITLE = "Predicta Energy — Inteligência de demanda para o setor elétrico";
 const DESCRIPTION =
-  "A Predicta prevê a pressão de demanda elétrica das próximas 24 horas, cruzando dados do ONS, clima e calendário, e simula uma tarifa dinâmica experimental que indica os melhores horários pra consumir ou deslocar carga.";
+  "A Predicta Energy prevê a pressão de demanda elétrica das próximas 24 horas, cruzando dados do ONS, clima e calendário, e simula uma tarifa dinâmica experimental que indica os melhores horários pra consumir ou deslocar carga.";
 
 // Base absoluta para og:image/twitter:image. Prioridade: NEXT_PUBLIC_SITE_URL (domínio
 // próprio, quando houver) → domínio de produção injetado pela Vercel → localhost em dev.
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Predicta" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Predicta Energy" }],
     locale: "pt_BR",
     type: "website",
   },
